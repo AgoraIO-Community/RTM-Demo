@@ -43,13 +43,30 @@ function useMediaFlip(query: string, onFlip: (matches: boolean) => void): void {
 /** One public entry per scenario; preserve existing URLs for invitation compatibility. */
 function PrimaryTabs({ activePath }: { activePath: string }) {
   const { search, hash } = useLocation();
+  const [plannedHint, setPlannedHint] = useState<{ id: string; x: number; y: number }>();
+  const showPlannedHint = (element: HTMLElement, id: string) => {
+    const rect = element.getBoundingClientRect();
+    setPlannedHint({ id, x: Math.max(96, Math.min(rect.left + rect.width / 2, window.innerWidth - 96)), y: rect.bottom + 8 });
+  };
   const preserveCurrentUrl = (element: HTMLAnchorElement, path: string) => {
     // Room admission updates history directly, so the router snapshot can lag behind.
     if (path === activePath && window.location.pathname === path) element.href = window.location.href;
   };
   return (
-    <nav className="lab-tabs lab-tabs--primary" aria-label="一级场景分类">
-      {experienceScenarios.map((scenario, index) => (
+    <>
+    <nav className="lab-tabs lab-tabs--primary" aria-label="一级场景分类"
+      onWheel={() => setPlannedHint(undefined)} onTouchMove={() => setPlannedHint(undefined)}>
+      {experienceScenarios.map((scenario, index) => scenario.status === 'planned' ? (
+        <button key={scenario.id} type="button" className="lab-tab lab-tab--primary lab-tab--planned"
+          aria-disabled="true" aria-describedby={plannedHint?.id === scenario.id ? 'planned-scene-hint' : undefined}
+          data-active={scenario.path === activePath} aria-current={scenario.path === activePath ? 'page' : undefined}
+          onMouseEnter={event => showPlannedHint(event.currentTarget, scenario.id)} onMouseLeave={() => setPlannedHint(undefined)}
+          onFocus={event => showPlannedHint(event.currentTarget, scenario.id)} onBlur={() => setPlannedHint(undefined)}
+          onClick={event => showPlannedHint(event.currentTarget, scenario.id)}>
+          <span className="lab-tab__num" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+          {scenario.label}
+        </button>
+      ) : (
         <Link key={scenario.id} to={scenario.path === activePath ? `${scenario.path}${search}${hash}` : scenario.path}
           reloadDocument className="lab-tab lab-tab--primary"
           onClick={event => preserveCurrentUrl(event.currentTarget, scenario.path)}
@@ -60,6 +77,9 @@ function PrimaryTabs({ activePath }: { activePath: string }) {
         </Link>
       ))}
     </nav>
+    {plannedHint && <span id="planned-scene-hint" className="lab-tabs__notice" role="status"
+      style={{ left: plannedHint.x, top: plannedHint.y }}>即将上线，敬请期待</span>}
+    </>
   );
 }
 

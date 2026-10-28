@@ -306,7 +306,8 @@ test.describe('外壳与导航', () => {
 
     const primaryNav = page.getByRole('navigation', { name: '一级场景分类' });
     await expect(primaryNav).toBeVisible();
-    await expect(primaryNav.getByRole('link')).toHaveCount(7);
+    await expect(primaryNav.getByRole('link')).toHaveCount(2);
+    await expect(primaryNav.getByRole('button', { disabled: true })).toHaveCount(5);
 
     expect(unexpected()).toEqual([]);
   });
@@ -316,20 +317,68 @@ test.describe('外壳与导航', () => {
     await expect(page).toHaveURL(/\/social\/voice-room$/);
   });
 
-  test('一级导航直接切换场景，体验路径显示对应状态', async ({ page }) => {
+  test('未开放导航只提示即将上线，不切换场景', async ({ page }, testInfo) => {
     const unexpected = collectErrors(page);
     await page.goto('/');
     await waitForPlaceholderLoginToSettle(page);
-    await page.getByRole('link', { name: '游戏互动' }).click();
-    await expect(page.getByRole('navigation', { name: '二级场景' })).toHaveCount(0);
-    await expect(page.getByRole('heading', { name: '游戏互动' })).toBeVisible();
-    const path = page.getByRole('complementary', { name: '体验路径' });
-    if (await path.getByRole('button', { name: '体验路径' }).getAttribute('aria-expanded') === 'false') {
-      await path.getByRole('button', { name: '体验路径' }).click();
-    }
-    await expect(path.getByText('游戏互动的体验任务正在准备中。')).toBeVisible();
+    const originalUrl = page.url();
+    const planned = page.getByRole('navigation').getByRole('button', { name: '游戏互动' });
+    await expect(planned).toHaveAttribute('aria-disabled', 'true');
+    // An aria-disabled item can receive focus/touch to explain availability, never navigate.
+    await planned.click({ force: true });
+    await expect(page.getByRole('status')).toHaveText('即将上线，敬请期待');
+    const anchor = (await planned.boundingBox())!;
+    const hint = (await page.getByRole('status').boundingBox())!;
+    expect(hint.y).toBeGreaterThanOrEqual(anchor.y + anchor.height);
+    expect(Math.abs(hint.x + hint.width / 2 - anchor.x - anchor.width / 2)).toBeLessThan(100);
+    await page.screenshot({ path: testInfo.outputPath('planned-navigation.png') });
+    await expect(page).toHaveURL(originalUrl);
+    await expect(page.getByTestId('voice-room-entry')).toBeVisible();
     expect(unexpected()).toEqual([]);
   });
+
+  for (const [path, label] of [
+    ['/social/voice-room', '新开听众页'],
+    ['/social/one-to-one-call', '新开体验页'],
+  ] as const) {
+    test(`${label}打开独立身份页面`, async ({ context, page }, testInfo) => {
+      await context.addInitScript(appId => {
+        (window as unknown as { __ENV__: { appId: string } }).__ENV__ = { appId };
+      }, PLACEHOLDER_APP_ID);
+      await page.goto(path);
+      const link = page.getByRole('link', { name: label });
+      const peerPromise = context.waitForEvent('page');
+      await link.click();
+      const peer = await peerPromise;
+      await peer.waitForLoadState();
+      await expect(peer).toHaveURL(new URL(path, page.url()).href);
+      expect(await peer.evaluate(() => window.opener === null)).toBe(true);
+      if (path === '/social/one-to-one-call') {
+        await expect(peer.getByTestId('one-to-one-call-workbench')).toBeVisible();
+        const localUid = await page.locator('.oc-call-id code').textContent();
+        const remoteUid = await peer.locator('.oc-call-id code').textContent();
+        expect(remoteUid).not.toBe(localUid);
+      } else {
+        const name = `标签页-${Date.now().toString(36)}`;
+        await page.getByLabel('房间标题').fill(name);
+        await page.getByLabel('房主昵称').fill('标签页房主');
+        await page.getByRole('button', { name: '创建并进入', exact: true }).click();
+        await expect(page.getByLabel('房主语聊房')).toBeVisible();
+        await peer.getByLabel('加入的房间名称').fill(name);
+        await peer.getByLabel('观众昵称').fill('标签页听众');
+        await peer.getByRole('button', { name: '加入房间', exact: true }).click();
+        await expect(peer.getByLabel('听众语聊房')).toBeVisible();
+        await expect(page.getByLabel('房主语聊房').getByText('标签页听众', { exact: true })).toBeVisible();
+      }
+      await peer.close();
+      // Capture the entry CTA after returning to a fresh page for visual inspection.
+      await page.goto(path);
+      await expect(page.getByRole('link', { name: label })).toBeVisible();
+      await page.screenshot({ path: testInfo.outputPath('new-tab-entry.png'), fullPage: true });
+      await page.getByTestId('theme-toggle').click();
+      await page.screenshot({ path: testInfo.outputPath('new-tab-entry-dark.png'), fullPage: true });
+    });
+  }
 
   test('1V1 呼叫邀请进入真实工作台', async ({ page }) => {
     const unexpected = collectErrors(page);
@@ -1182,7 +1231,7 @@ test.describe('体验路径与工作台适配', () => {
     if (mobileGuide) await toggle.click();
     await expect(progress).toHaveAttribute('aria-valuenow', '1');
     if (mobileGuide) await toggle.click();
-    await page.getByRole('link', { name: '电商直播', exact: true }).click();
+    await page.getByRole('link', { name: '1V1呼叫邀请', exact: true }).click();
     // 占位页正文也有「语聊房」链接，限定到顶栏导航。
     await page.getByRole('navigation', { name: '一级场景分类' }).getByRole('link', { name: '语聊房', exact: true }).click();
     if (mobileGuide) await toggle.click();

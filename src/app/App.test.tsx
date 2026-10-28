@@ -45,11 +45,16 @@ describe('实验室外壳', () => {
     renderApp();
     const nav = screen.getByRole('navigation', { name: '一级场景分类' });
     // 导航项带等宽序号 01–07，序号对读屏隐藏，可访问名仍是场景名。
-    expect(within(nav).getAllByRole('link').map((link) => link.textContent)).toEqual([
+    expect(Array.from(nav.children).map((item) => item.textContent)).toEqual([
       '01语聊房', '021V1呼叫邀请', '03电商直播', '04在线课堂', '05虚拟世界', '06游戏互动', '07文档协同',
     ]);
     for (const scenario of experienceScenarios) {
-      expect(within(nav).getByRole('link', { name: scenario.label })).toHaveAttribute('href', scenario.path);
+      if (scenario.status === 'ready') {
+        expect(within(nav).getByRole('link', { name: scenario.label })).toHaveAttribute('href', scenario.path);
+      } else {
+        expect(within(nav).getByRole('button', { name: scenario.label })).toHaveAttribute('aria-disabled', 'true');
+        expect(within(nav).queryByRole('link', { name: scenario.label })).not.toBeInTheDocument();
+      }
     }
     expect(screen.queryByRole('navigation', { name: '二级场景' })).not.toBeInTheDocument();
     expect(within(nav).getByRole('link', { name: '语聊房' })).toHaveAttribute('aria-current', 'page');
@@ -58,7 +63,7 @@ describe('实验室外壳', () => {
   it('所有未建场景的独立 URL 均显示对应标题和体验路径', () => {
     for (const scenario of experienceScenarios.filter((item) => item.status === 'planned')) {
       const view = renderApp({ path: scenario.path });
-      const link = within(screen.getByRole('navigation')).getByRole('link', { name: scenario.label });
+      const link = within(screen.getByRole('navigation')).getByRole('button', { name: scenario.label });
       expect(link).toHaveAttribute('aria-current', 'page');
       expect(within(screen.getByTestId('scene-placeholder')).getByRole('heading', { name: scenario.label })).toBeInTheDocument();
       const path = screen.getByRole('complementary', { name: '体验路径' });
@@ -66,6 +71,27 @@ describe('实验室外壳', () => {
       expect(within(path).queryByRole('progressbar')).not.toBeInTheDocument();
       view.unmount();
     }
+  });
+
+  it('未开放导航提示即将上线，点击后仍停留在当前场景', async () => {
+    const user = userEvent.setup();
+    renderApp();
+    for (const scenario of experienceScenarios.filter(item => item.status === 'planned')) {
+      await user.click(screen.getByRole('button', { name: scenario.label }));
+      expect(screen.getByRole('status')).toHaveTextContent('即将上线，敬请期待');
+      expect(screen.getByTestId('scene-voice-room')).toBeInTheDocument();
+    }
+  });
+
+  it.each([
+    ['/social/voice-room', '新开听众页'],
+    ['/social/one-to-one-call', '新开体验页'],
+  ])('场景 %s 的新标签页入口使用独立身份和干净 URL', async (path, label) => {
+    renderApp({ path });
+    const link = await screen.findByRole('link', { name: label });
+    expect(link).toHaveAttribute('href', path);
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
   });
 
   it('体验路径有五步任务、Console 和三项文档入口，悬浮说明不会手动完成任务', async () => {

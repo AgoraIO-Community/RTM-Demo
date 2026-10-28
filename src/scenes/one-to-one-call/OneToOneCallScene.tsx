@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
-import { Copy, Mic, MicOff, Phone, PhoneOff, RotateCcw, WifiOff } from 'lucide-react';
+import { ArrowUpRight, Copy, Mic, MicOff, Phone, PhoneOff, RotateCcw, WifiOff } from 'lucide-react';
 
 import type { ResolvedEnv } from '../../app/env';
 import { useSceneSessionLifecycle } from '../../app/sceneSessions';
@@ -210,6 +210,7 @@ function CallWorkbench({
               <div className="oc-avatar" aria-hidden="true">{call.result ? <PhoneOff size={24} /> : <Phone size={24} />}</div>
               <div className="oc-stage-copy"><span className="oc-section-label">{call.result ? 'CALL ENDED' : 'READY'}</span><h2>{call.result ? RESULT_LABELS[call.result.reason] ?? '呼叫已结束' : '呼叫另一位在线用户'}</h2><p>{call.result ? '可以发起或接听新的呼叫。' : '输入对方页面显示的呼叫 ID。'}</p></div>
               <label className="oc-field oc-field--wide"><span>对方呼叫 ID</span><input value={target} onChange={(event) => setTarget(event.target.value)} placeholder="call-xxxxxxxxxxxx" /></label>
+              <p className="oc-peer-hint">没有对方？<a className="ink-inline-link" href="/social/one-to-one-call" target="_blank" rel="noopener noreferrer">新开体验页<ArrowUpRight size={13} aria-hidden="true" /></a></p>
               <div className="oc-call-actions">
                 <button type="submit" className="ink-button ink-button--primary" disabled={signalingUnavailable || !isValidCallUid(normalizedTarget) || normalizedTarget === localUid || Boolean(nicknameError)}><Phone size={17} />发起呼叫</button>
                 {call.result && <button type="button" className="ink-button" onClick={() => controller.dismissResult()}>完成</button>}

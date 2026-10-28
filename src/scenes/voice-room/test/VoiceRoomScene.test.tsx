@@ -781,8 +781,9 @@ describe('语聊房单端入口', () => {
     await user.type(screen.getByLabelText('房间标题'), 'Host 返回房间');
     await user.type(screen.getByLabelText('房主昵称'), '返回的房主');
     await user.click(screen.getByRole('button', { name: '创建并进入' }));
-    const firstPayload = parseVoiceRoomUrl(window.location.search)!;
     const room = await screen.findByLabelText('房主语聊房');
+    await waitFor(() => expect(parseVoiceRoomUrl(window.location.search)?.nickname).toBe('返回的房主'));
+    const firstPayload = parseVoiceRoomUrl(window.location.search)!;
 
     await user.click(within(room).getByRole('button', { name: '暂时离开' }));
     await user.click(await screen.findByRole('button', { name: '以 Host 身份返回' }));

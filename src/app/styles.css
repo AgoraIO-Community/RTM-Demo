@@ -3,7 +3,7 @@
  *
  * 设计交接包见 design/rtm-experience-hall/（README.md 为规范原文，Lab.dc.html 为主原型）。
  * 黑白灰为骨架，等宽字体承担所有「机器可读」信息（编号、时间戳、耗时、API 名、状态词、计数、TAG），
- * 彩色只出现在三处：品牌渐变（进度条与 Console CTA 描边）、成功绿、数据流 API / EVENT 类型边框与标签。
+ * 彩色用于品牌渐变（进度条与 Console CTA 描边）、成功绿、数据流 API / EVENT 类型，以及辅助链接。
  *
  * 颜色只在下面两个 token 块里出现一次；组件规则一律引用变量，不写十六进制。
  * 密度只实现 comfortable 一档（用户拍板），尺寸变量集中在 :root。
@@ -32,6 +32,7 @@
   --ink-ink: #111214;
   --ink-on-ink: #ffffff;
   --ink-success: #1f8a5b;
+  --ink-link: #2b63b8;
   --ink-danger: #c8362f;
   /* 数据流类型色保持 v1.1 色板；v1.2 行底统一使用 surface。 */
   --ink-trace-api: #2fa98a;
@@ -96,6 +97,7 @@
   --ink-ink: #f2f2f3;
   --ink-on-ink: #111214;
   --ink-success: #3fb27f;
+  --ink-link: #9bbcff;
   --ink-danger: #e5534b;
   --ink-trace-api: #7fdcc3;
   --ink-trace-api-bg: #1e4a3f;
@@ -217,6 +219,7 @@ input {
 /* ---------- 通用控件 ---------- */
 
 .ink-button {
+  text-decoration: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -431,6 +434,57 @@ input {
 .lab-tab--primary:hover {
   color: var(--ink-fg);
 }
+
+.lab-tab--planned,
+.lab-tab--planned:hover {
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--ink-disabled);
+  font: inherit;
+  cursor: not-allowed;
+}
+
+.lab-tabs__notice {
+  position: fixed;
+  transform: translateX(-50%);
+  z-index: 100;
+  width: 176px;
+  padding: 7px 10px;
+  border: 1px solid var(--ink-line);
+  border-radius: 6px;
+  background: var(--ink-surface);
+  color: var(--ink-fg2);
+  font-size: 12px;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.ink-inline-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 24px;
+  padding: 0 4px;
+  border-radius: 4px;
+  color: var(--ink-link);
+  background: color-mix(in srgb, var(--ink-link) 8%, transparent);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--ink-link) 35%, transparent);
+  text-underline-offset: 4px;
+}
+
+.ink-inline-link:hover,
+.ink-inline-link:focus-visible {
+  color: var(--ink-link);
+  background: color-mix(in srgb, var(--ink-link) 14%, transparent);
+  outline-color: var(--ink-link);
+  text-decoration-color: currentColor;
+}
+
+.ink-inline-link svg { flex: none; }
 
 .lab-tab--primary[data-active='true'] {
   color: var(--ink-fg);
@@ -1858,6 +1912,12 @@ input {
   color: var(--ink-danger);
 }
 
+@media (min-width: 761px) {
+  .vr-entry__choice-panel > .vr-entry__hint:first-of-type {
+    min-height: calc(1.6em * 2);
+  }
+}
+
 .vr-entry__footnote {
   margin: 0;
   font-family: var(--ink-font-mono);
@@ -2447,7 +2507,7 @@ input {
 .oc-call-stage {
   display: grid;
   min-width: 0;
-  padding: clamp(24px, 6vh, 64px) clamp(24px, 6vw, 72px);
+  padding: clamp(24px, 6vh, 64px) clamp(20px, 3vw, 40px);
   place-items: center;
 }
 
@@ -2465,6 +2525,7 @@ input {
 .oc-stage-copy p,
 .oc-call-status p { margin: 5px 0 0; color: var(--ink-fg2); }
 .oc-field--wide { width: 100%; margin-top: 8px; text-align: left; }
+.oc-peer-hint { width: 100%; margin: -8px 0 0; color: var(--ink-mono); font-size: 12px; text-align: left; }
 
 .oc-avatar {
   display: grid;

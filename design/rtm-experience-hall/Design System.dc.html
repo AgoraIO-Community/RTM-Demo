@@ -19,8 +19,8 @@ input::placeholder{color:#a3a7ae}
 @keyframes lab-seatbreathe{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 12px 1px rgb(17 18 20 / 20%)}}
 @keyframes lab-rowin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @keyframes lab-rowbreathe{0%,100%{border-color:var(--ink-line);border-left-color:var(--trace-color);box-shadow:0 0 0 0 transparent}50%{border-color:var(--trace-color);box-shadow:0 0 10px 0 color-mix(in oklab,var(--trace-color) 35%,transparent)}}
-:root{--ink-canvas:#fafafa;--ink-surface:#ffffff;--ink-subtle:#fbfbfc;--ink-grid:#ececee;--ink-line:#e6e7ea;--ink-fg:#111214;--ink-fg2:#5f6368;--ink-mono:#6b7079;--ink-mono2:#8b8f96;--ink-danger:#c8362f;--ink-dash:#dcdee2;--ink-trace-api:#2fa98a;--ink-trace-event:#3d7fc2;--ink-stage-shadow:0 1px 2px rgba(17,18,20,.04),0 12px 32px -8px rgba(17,18,20,.12);--ink-font-mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;--ink-row-p:11px}
-[data-theme="dark"]{--ink-canvas:#0f1012;--ink-surface:#141517;--ink-subtle:#1b1c1f;--ink-grid:#1a1b1e;--ink-line:#2a2b2f;--ink-fg:#f2f2f3;--ink-fg2:#a3a7ae;--ink-mono:#a3a7ae;--ink-mono2:#8b8f96;--ink-danger:#e5534b;--ink-dash:#3a3b40;--ink-trace-api:#7fdcc3;--ink-trace-event:#8ab9e6;--ink-stage-shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px -8px rgba(0,0,0,.6)}
+:root{--ink-link:#2b63b8;--ink-canvas:#fafafa;--ink-surface:#ffffff;--ink-subtle:#fbfbfc;--ink-grid:#ececee;--ink-line:#e6e7ea;--ink-fg:#111214;--ink-fg2:#5f6368;--ink-mono:#6b7079;--ink-mono2:#8b8f96;--ink-danger:#c8362f;--ink-dash:#dcdee2;--ink-trace-api:#2fa98a;--ink-trace-event:#3d7fc2;--ink-stage-shadow:0 1px 2px rgba(17,18,20,.04),0 12px 32px -8px rgba(17,18,20,.12);--ink-font-mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;--ink-row-p:11px}
+[data-theme="dark"]{--ink-link:#9bbcff;--ink-canvas:#0f1012;--ink-surface:#141517;--ink-subtle:#1b1c1f;--ink-grid:#1a1b1e;--ink-line:#2a2b2f;--ink-fg:#f2f2f3;--ink-fg2:#a3a7ae;--ink-mono:#a3a7ae;--ink-mono2:#8b8f96;--ink-danger:#e5534b;--ink-dash:#3a3b40;--ink-trace-api:#7fdcc3;--ink-trace-event:#8ab9e6;--ink-stage-shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px -8px rgba(0,0,0,.6)}
 .ds-grid{padding:24px;background-color:var(--ink-canvas);background-image:linear-gradient(var(--ink-grid) 1px,transparent 1px),linear-gradient(90deg,var(--ink-grid) 1px,transparent 1px);background-size:72px 72px;background-position:-1px -1px;color:var(--ink-fg);border:1px solid var(--ink-line);border-radius:8px}
 .ds-stage{padding:24px;background:var(--ink-surface);border:1px solid var(--ink-line);border-radius:8px;box-shadow:var(--ink-stage-shadow);color:var(--ink-fg)}
 .ds-note{font-size:12px;line-height:1.7;color:var(--ink-fg2);margin:0}.ds-code{font:11px/1.7 var(--ink-font-mono);overflow-wrap:anywhere}.ds-title{display:inline-flex;align-items:center;gap:8px;font-size:16px;font-weight:700;white-space:nowrap}.ds-title svg{width:16px;height:16px;flex:none}
@@ -124,6 +124,7 @@ input::placeholder{color:#a3a7ae}
     <p class="ds-note">1V1 的所有终态在 RTC 清理完成后自动回到 IDLE，结束原因保留在拨号表单标题区，说明为“可以发起或接听新的呼叫。”。拨号与昵称编辑立即可用；“完成”使用次要线框按钮，只收起提示，不阻塞新呼叫。</p>
     <p class="ds-note">邀请 publish 失败返回后立即结束，不自动重试；本地 CONNECTED 显示“对方不在线”，其他连接状态显示“本地网络异常，呼叫失败”。断线蒙层显示同一本地网络错误，恢复连接后可重新发起。30 秒截止用于已发送邀请的未接听等待，过期接听不启动 RTC。</p>
     <p class="ds-note">30 秒未接通时，主叫结束提示为“对方无应答”，被叫为“邀请已过期”；被叫等待 ACK 同样保留原截止计时器，到期自行回到空闲。再次呼叫使用新的 callId。</p>
+    <p class="ds-note">第 03–07 项场景导航使用禁用样式，不跳转，在对应导航项下方提示“即将上线，敬请期待”。语聊房加入卡片名称说明和 1V1 对方呼叫 ID 输入框下方分别提供“同机体验？新开听众页 ↗”和“没有对方？新开体验页 ↗”轻量文字链接，使用 --ink-link 浅深主题蓝色、8% 淡底色与细下划线，悬浮／聚焦时底色 14%，不加按钮边框；新标签页使用独立身份，链接带 noopener noreferrer。桌面创建／加入卡片的名称说明预留两行以对齐字段；1V1 拨号区横向内边距使用 clamp(20px, 3vw, 40px)。</p>
     <p class="ds-note">生产场景导航整页跳转，当前页面只拥有当前场景的一个 RTM Client。主题偏好保留；体验进度、数据流与侧栏折叠态重置。页面离开时尽力清理，历史缓存恢复时重新加载；本原型只模拟视图切换。</p>
     <p class="ds-note">1V1 呼叫主状态使用大写下划线：IDLE、OUTGOING_SENDING、OUTGOING_RINGING、INCOMING_RINGING、ACCEPTING、MEDIA_CONNECTING、ACTIVE；状态标签直接展示该值。每次邀请独立实例，结束直接 IDLE 并显示原因，后台清理不阻塞新邀请，不展示 ENDING。主叫和被叫分别维护本地状态，不要求同时处于相同状态。</p>
     <p class="ds-note">发送中不显示接听倒计时；邀请发送成功后，主叫从 30s 开始等待。被叫收到邀请后从自己的 30s 开始，接听与重发不重新计时。</p>
@@ -177,7 +178,7 @@ input::placeholder{color:#a3a7ae}
           <div style="display:flex;gap:4px;height:44px;border-bottom:1px solid #e6e7ea;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:12px">
             <a href="#" style="display:flex;align-items:center;gap:6px;padding:0 12px;text-decoration:none;color:#111214;font-weight:600;border-bottom:2px solid #111214;margin-bottom:-1px;white-space:nowrap"><span style="color:#6b7079;font-weight:500">01</span>语聊房</a>
             <a href="#" style="display:flex;align-items:center;gap:6px;padding:0 12px;text-decoration:none;color:#5f6368;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap"><span style="color:#a3a7ae">02</span>1V1呼叫邀请</a>
-            <a href="#" style="display:flex;align-items:center;gap:6px;padding:0 12px;text-decoration:none;color:#5f6368;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap"><span style="color:#a3a7ae">03</span>电商直播</a>
+            <button type="button" aria-disabled="true" title="即将上线，敬请期待" style="display:flex;align-items:center;gap:6px;padding:0 12px;font:inherit;background:transparent;border:0;border-bottom:2px solid transparent;color:#a3a7ae;cursor:not-allowed;white-space:nowrap"><span>03</span>电商直播</button>
           </div>
         </div>
       </div>

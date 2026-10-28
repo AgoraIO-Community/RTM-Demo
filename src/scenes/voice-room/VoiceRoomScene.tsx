@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type KeyboardEvent as ReactKeyboardEvent, type ClipboardEvent as ReactClipboardEvent } from "react";
-import { CircleX, LockKeyhole, Radio } from "lucide-react";
+import { ArrowUpRight, CircleX, LockKeyhole, Radio } from "lucide-react";
 
 import type { ResolvedEnv } from "../../app/env";
 import { useSceneSessionLifecycle } from "../../app/sceneSessions";
@@ -1006,7 +1006,7 @@ export function VoiceRoomScene({
         <div className="vr-entry__intro">
           <span className="ink-eyebrow">01 · VOICE ROOM</span>
           <h1>语聊房：麦位与房内互动</h1>
-          <p>一台设备创建房间成为房主，另一台输入相同名称加入成为听众。右侧数据流会实时记录每一次 RTM 调用与事件。</p>
+          <p>创建房间成为房主，输入相同名称加入成为听众。右侧数据流实时记录 RTM 调用与事件。</p>
         </div>
         <div className="vr-entry__choices">
           <section className="vr-entry__choice-panel vr-entry__choice--host">
@@ -1032,7 +1032,7 @@ export function VoiceRoomScene({
               房间名称
               <input className="ink-input" aria-label="加入的房间名称" aria-describedby="join-name-hint" aria-invalid={!!joinError} disabled={pending} value={joinName} onChange={event => setJoinName(event.target.value)} onKeyDown={event => submitOnEnter(event, joinByName)} placeholder="输入房主告诉你的房间名称" />
             </label>
-            <p id="join-name-hint" className={`vr-entry__hint ${joinError ? 'vr-entry__hint--error' : ''}`}>{joinError ?? '换一台设备，输入相同名称即可加入。'}</p>
+            <p id="join-name-hint" className={`vr-entry__hint ${joinError ? 'vr-entry__hint--error' : ''}`}>{joinError ?? <>同机体验？<a className="ink-inline-link" href="/social/voice-room" target="_blank" rel="noopener noreferrer">新开听众页<ArrowUpRight size={13} aria-hidden="true" /></a></>}</p>
             <label>
               你的昵称（选填）
               <input className="ink-input" aria-label="观众昵称" aria-describedby="audience-nickname-hint" aria-invalid={!!audienceNicknameError} disabled={pending} value={audienceNickname} onChange={event => { setAudienceNickname(event.target.value); setAudienceNicknamePasteError(undefined); }} onPaste={event => pasteNickname(event, setAudienceNicknamePasteError)} onKeyDown={event => submitOnEnter(event, joinByName)} placeholder="例如：小雨" />
