@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>墨 · Ink — v1.2 + 2026-09-22 增量设计系统</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;background:#fafafa;color:#111214;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Helvetica Neue",Helvetica,sans-serif;font-size:13px;font-weight:500;line-height:1.5}
+a{color:#111214}a:hover{color:#5f6368}
+*{box-sizing:border-box}
+input::placeholder{color:#a3a7ae}
+@keyframes lab-flow{to{background-position:200% 200%}}
+@keyframes lab-ripple{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.45);opacity:0}}
+@keyframes lab-seatbreathe{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 12px 1px rgb(17 18 20 / 20%)}}
+@keyframes lab-rowin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes lab-rowbreathe{0%,100%{border-color:var(--ink-line);border-left-color:var(--trace-color);box-shadow:0 0 0 0 transparent}50%{border-color:var(--trace-color);box-shadow:0 0 10px 0 color-mix(in oklab,var(--trace-color) 35%,transparent)}}
+:root{--ink-canvas:#fafafa;--ink-surface:#ffffff;--ink-subtle:#fbfbfc;--ink-grid:#ececee;--ink-line:#e6e7ea;--ink-fg:#111214;--ink-fg2:#5f6368;--ink-mono:#6b7079;--ink-mono2:#8b8f96;--ink-danger:#c8362f;--ink-dash:#dcdee2;--ink-trace-api:#2fa98a;--ink-trace-event:#3d7fc2;--ink-stage-shadow:0 1px 2px rgba(17,18,20,.04),0 12px 32px -8px rgba(17,18,20,.12);--ink-font-mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;--ink-row-p:11px}
+[data-theme="dark"]{--ink-canvas:#0f1012;--ink-surface:#141517;--ink-subtle:#1b1c1f;--ink-grid:#1a1b1e;--ink-line:#2a2b2f;--ink-fg:#f2f2f3;--ink-fg2:#a3a7ae;--ink-mono:#a3a7ae;--ink-mono2:#8b8f96;--ink-danger:#e5534b;--ink-dash:#3a3b40;--ink-trace-api:#7fdcc3;--ink-trace-event:#8ab9e6;--ink-stage-shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px -8px rgba(0,0,0,.6)}
+.ds-grid{padding:24px;background-color:var(--ink-canvas);background-image:linear-gradient(var(--ink-grid) 1px,transparent 1px),linear-gradient(90deg,var(--ink-grid) 1px,transparent 1px);background-size:72px 72px;background-position:-1px -1px;color:var(--ink-fg);border:1px solid var(--ink-line);border-radius:8px}
+.ds-stage{padding:24px;background:var(--ink-surface);border:1px solid var(--ink-line);border-radius:8px;box-shadow:var(--ink-stage-shadow);color:var(--ink-fg)}
+.ds-note{font-size:12px;line-height:1.7;color:var(--ink-fg2);margin:0}.ds-code{font:11px/1.7 var(--ink-font-mono);overflow-wrap:anywhere}.ds-title{display:inline-flex;align-items:center;gap:8px;font-size:16px;font-weight:700;white-space:nowrap}.ds-title svg{width:16px;height:16px;flex:none}
+.ds-pills{display:flex;flex-wrap:wrap;gap:6px}.ds-pill{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border:1px solid var(--ink-line);border-radius:999px;background:var(--ink-surface);color:var(--ink-fg);font:11px var(--ink-font-mono);cursor:pointer}.ds-pill[aria-pressed="true"]{border-color:var(--ink-fg)}.ds-pill-dot{height:8px;width:8px;border-radius:50%;background:var(--ink-trace-api)}.ds-pill[data-kind="event"] .ds-pill-dot{background:var(--ink-trace-event)}
+.ds-traces{list-style:none;padding:12px 14px;margin:0;display:grid;gap:10px;min-width:0;background:var(--ink-surface)}
+.ds-trace{--trace-color:var(--ink-trace-api);position:relative;display:grid;grid-template-columns:86px minmax(0,1fr);gap:0 10px;min-height:70px;padding:14px 12px;border:1px solid var(--ink-line);border-left:3px solid var(--trace-color);border-radius:6px;background:var(--ink-surface);color:var(--ink-fg);animation:lab-rowin .35s ease-out,lab-rowbreathe 1.8s ease-in-out .3s 2}
+.ds-trace[data-kind="event"]{--trace-color:var(--ink-trace-event)}.ds-trace[data-failed="true"]{box-shadow:inset 0 0 0 1px var(--ink-danger)}.ds-trace time{font:11px/18px var(--ink-font-mono);white-space:nowrap;color:var(--ink-mono)}.ds-trace-body{min-width:0}.ds-trace-head{display:flex;align-items:center;gap:8px;height:18px;line-height:18px;min-width:0;white-space:nowrap}.ds-trace-kind{flex:none;color:var(--trace-color);font:600 10px var(--ink-font-mono);letter-spacing:.1em}.ds-trace-name{min-width:0;overflow:hidden;text-overflow:ellipsis;font:600 12px var(--ink-font-mono)}.ds-trace-tag{min-width:0;overflow:hidden;text-overflow:ellipsis;font:10px/14px var(--ink-font-mono);padding:1px 5px;border:1px solid var(--ink-dash);border-radius:3px;color:var(--ink-fg2)}.ds-trace-duration{flex:none;margin-left:auto;font:11px var(--ink-font-mono);color:var(--ink-mono2)}
+.ds-trace-summary{display:grid;grid-template-columns:minmax(0,1fr);gap:2px;min-width:0;overflow:visible;white-space:normal;font-size:12px;line-height:18px;margin-top:4px;color:var(--ink-fg2)}.ds-trace-summary-text{min-width:0;width:100%;overflow-wrap:anywhere}.ds-trace-error{display:flex;align-items:baseline;flex-wrap:wrap;min-width:0;width:100%;max-width:100%;font:11px/18px var(--ink-font-mono);color:var(--ink-danger);white-space:normal}.ds-trace-error code{flex:none;margin-right:6px}.ds-trace-error span{min-width:0;overflow-wrap:anywhere}
+.ds-trace-detail{display:none;position:absolute;z-index:3;left:0;right:0;top:calc(100% + 6px);padding:10px 12px;border:1px solid var(--ink-line);border-radius:6px;background:var(--ink-surface);color:var(--ink-fg2);font:12px/1.6 -apple-system,'PingFang SC',sans-serif;white-space:pre-wrap;overflow-wrap:anywhere}.ds-trace:hover .ds-trace-detail,.ds-trace:focus .ds-trace-detail{display:block}.ds-trace:focus-visible{outline:2px solid var(--ink-fg);outline-offset:2px}
+.ds-crown{position:absolute;top:-12px;left:8px;padding:0 2px;border-radius:3px;background:var(--ink-surface);line-height:0;color:var(--ink-fg)}.ds-crown svg{width:22px;height:22px;fill:currentColor}.ds-seat{position:relative;display:grid;align-content:center;justify-items:center;gap:10px;min-height:132px;border:1px solid var(--ink-fg);border-radius:10px;background:var(--ink-surface);color:var(--ink-fg)}
+.ds-chat-feed{display:flex;flex-direction:column;gap:11px;max-height:calc(7.5em + 4 * var(--ink-row-p));overflow:auto;font-size:13px;line-height:1.5}.ds-chat-feed p{margin:0;flex:none;min-height:1.5em;line-height:1.5;word-break:break-word}.ds-chat-feed strong{font-weight:600}
+.ds-nickname-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.ds-nickname-card{display:grid;align-content:start;gap:10px;padding:20px;border:1px solid var(--ink-line);border-radius:8px}.ds-nickname-card label{display:grid;gap:8px;font-weight:600}.ds-nickname-card input{min-width:0;width:100%;height:38px;padding:0 12px;border:1px solid var(--ink-line);border-radius:6px;background:var(--ink-surface);color:var(--ink-fg);font:inherit;font-weight:500}.ds-nickname-card [aria-invalid="true"]{border-color:var(--ink-danger)}.ds-nickname-card p{margin:0;font-size:12px;line-height:1.6;color:var(--ink-fg2)}.ds-nickname-card p[data-error="true"]{color:var(--ink-danger)}
+@media(max-width:760px){body>div{overflow-wrap:anywhere}section[id]{grid-template-columns:minmax(0,1fr)!important;gap:20px!important}.ds-nickname-grid{grid-template-columns:minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){.ds-trace,[style*="animation:"]{animation:none!important}}
+</style>
+</helmet>
+<div style="max-width:1120px;margin:0 auto;padding:64px 40px 120px;display:grid;gap:72px">
+
+  <header style="display:grid;gap:16px;padding-bottom:40px;border-bottom:1px solid #e6e7ea">
+    <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.1em;color:#6b7079">RTM 在线体验馆 · DESIGN SYSTEM · v1.2 + 2026-09-22 增量</span>
+    <h1 style="margin:0;font-size:40px;font-weight:700;letter-spacing:-.03em;line-height:1.05">墨 · Ink</h1>
+    <p style="margin:0;max-width:640px;color:#5f6368;font-size:15px;line-height:1.7">黑白灰为骨架，等宽字体承担所有「机器可读」的信息（编号、时间、状态、API 名），彩色只出现在三处：一条流动的渐变、任务完成的绿色勾，以及数据流里区分 API（薄荷）与事件（天蓝）的左边框与类型标签。目标是让场景退后、让数据流成为主角。</p>
+    <nav style="display:flex;flex-wrap:wrap;gap:6px 18px;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.04em;margin-top:8px">
+      <a href="#color" style="text-decoration:none;color:#5f6368">01 色板</a><a href="#type" style="text-decoration:none;color:#5f6368">02 字体</a><a href="#space" style="text-decoration:none;color:#5f6368">03 间距 / 圆角 / 阴影</a><a href="#comp" style="text-decoration:none;color:#5f6368">04 组件</a><a href="#trace" style="text-decoration:none;color:#5f6368">05 时间线节点</a><a href="#icon" style="text-decoration:none;color:#5f6368">06 图标</a><a href="#dark" style="text-decoration:none;color:#5f6368">07 暗色映射</a>
+    </nav>
+  </header>
+
+  <!-- 01 色板 -->
+  <section id="color" style="display:grid;grid-template-columns:minmax(200px,220px) minmax(0,1fr);gap:40px">
+    <div style="display:grid;gap:8px;align-content:start"><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.1em;color:#6b7079">01</span><h2 style="margin:0;font-size:20px;font-weight:700;letter-spacing:-.02em">色板与语义 Token</h2><p style="margin:0;color:#5f6368">灰阶 8 级；成功、危险与 API / EVENT 类型色各有固定语义。渐变仅用于品牌引导。以代码 51e9f6d 的 comfortable 密度为基线。</p></div>
+    <div style="display:grid;gap:36px">
+      <div style="display:grid;gap:12px">
+        <span style="font-weight:600">灰阶 · Neutral</span>
+        <div style="display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px">
+          <sc-for list="{{ neutrals }}" as="n" hint-placeholder-count="8">
+            <div style="display:grid;gap:8px"><span style="display:block;height:64px;border-radius:6px;background:{{ n.hex }};border:1px solid #e6e7ea"></span><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;color:#6b7079;line-height:1.5">{{ n.name }}<br><span style="color:#111214">{{ n.hex }}</span></span></div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:grid;gap:12px">
+        <span style="font-weight:600">语义 · Semantic</span>
+        <div style="display:grid;grid-template-columns:minmax(0,1fr);border-top:1px solid #e6e7ea">
+          <sc-for list="{{ tokens }}" as="t" hint-placeholder-count="10">
+            <div style="display:grid;grid-template-columns:28px 220px minmax(0,1fr) 90px;gap:16px;align-items:center;padding:10px 0;border-bottom:1px solid #f0f1f3"><span style="display:block;width:28px;height:28px;border-radius:6px;background:{{ t.hex }};border:1px solid #e6e7ea"></span><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:12px">{{ t.name }}</span><span style="color:#5f6368">{{ t.use }}</span><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;color:#6b7079;text-align:right">{{ t.hex }}</span></div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:grid;gap:12px">
+        <span style="font-weight:600">渐变 · Gradient</span>
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:center">
+          <span style="display:block;height:12px;border-radius:6px;background:linear-gradient(90deg,#f6a34a,#ee5a9a,#8b5cf6,#38bdf8)"></span>
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;color:#6b7079;line-height:1.7">--gradient-brand<br><span style="color:#111214">#f6a34a → #ee5a9a → #8b5cf6 → #38bdf8</span><br>仅用于：进度条、Console 按钮描边</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 字体 -->
+  <section id="type" style="display:grid;grid-template-columns:minmax(200px,220px) minmax(0,1fr);gap:40px">
+    <div style="display:grid;gap:8px;align-content:start"><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.1em;color:#6b7079">02</span><h2 style="margin:0;font-size:20px;font-weight:700;letter-spacing:-.02em">字体层级</h2><p style="margin:0;color:#5f6368">正文用系统苹方 / 微软雅黑。等宽字体（SF Mono / Menlo / Consolas）承担编号、时间戳、状态、API 名、导航标签。</p></div>
+    <div style="display:grid;border-top:1px solid #e6e7ea">
+      <sc-for list="{{ type }}" as="t" hint-placeholder-count="8">
+        <div style="display:grid;grid-template-columns:200px minmax(0,1fr);gap:24px;align-items:baseline;padding:18px 0;border-bottom:1px solid #f0f1f3">
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;color:#6b7079;line-height:1.7">{{ t.token }}<br><span style="color:#111214">{{ t.spec }}</span></span>
+          <span style="font-family:{{ t.family }};font-size:{{ t.size }}px;font-weight:{{ t.weight }};letter-spacing:{{ t.ls }};color:{{ t.color }};line-height:1.2">{{ t.sample }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <!-- 03 间距 -->
+  <section id="space" style="display:grid;grid-template-columns:minmax(200px,220px) minmax(0,1fr);gap:40px">
+    <div style="display:grid;gap:8px;align-content:start"><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.1em;color:#6b7079">03</span><h2 style="margin:0;font-size:20px;font-weight:700;letter-spacing:-.02em">间距 / 圆角 / 阴影</h2><p style="margin:0;color:#5f6368">4px 基准。comfortable 密度：面板内边距 24px、列表纵向间距 11px、按钮高 38px。1px 线建立层级，真实场景工作台使用固定 stage-shadow；选中 ring 与状态呼吸继续保留。</p></div>
+    <div style="display:grid;gap:36px">
+      <div style="display:grid;gap:12px"><span style="font-weight:600">间距 · Space</span>
+        <div style="display:flex;align-items:flex-end;gap:16px">
+          <sc-for list="{{ spaces }}" as="s" hint-placeholder-count="7"><div style="display:grid;gap:8px;justify-items:center"><span style="display:block;width:{{ s.px }}px;height:{{ s.px }}px;background:#111214;border-radius:2px"></span><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;color:#6b7079">{{ s.px }}</span></div></sc-for>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:36px">
+        <div style="display:grid;gap:12px"><span style="font-weight:600">圆角 · Radius</span>
+          <div style="display:flex;flex-wrap:wrap;gap:16px">
+            <sc-for list="{{ radii }}" as="r" hint-placeholder-count="5"><div style="display:grid;gap:8px;justify-items:center"><span style="display:block;width:56px;height:56px;border:1px solid #111214;border-radius:{{ r.px }}px"></span><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;color:#6b7079;text-align:center;line-height:1.5">{{ r.px }}<br>{{ r.use }}</span></div></sc-for>
+          </div>
+        </div>
+        <div style="display:grid;gap:12px"><span style="font-weight:600">阴影 / 描边 · Elevation</span>
+          <div style="display:flex;flex-wrap:wrap;gap:16px">
+            <div style="display:grid;gap:8px;justify-items:center"><span style="display:block;width:72px;height:56px;background:#fff;border:1px solid #e6e7ea;border-radius:8px"></span><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;color:#6b7079;text-align:center;line-height:1.5">line-1<br>默认面板</span></div>
+            <div style="display:grid;gap:8px;justify-items:center"><span style="display:block;width:72px;height:56px;background:#fff;border:1px solid #111214;border-radius:8px"></span><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;color:#6b7079;text-align:center;line-height:1.5">line-ink<br>选中 / 焦点</span></div>
+            <div style="display:grid;gap:8px;justify-items:center"><span style="display:block;width:72px;height:56px;background:#fff;border:1px solid #111214;border-radius:8px;box-shadow:0 0 0 3px rgb(17 18 20 / 10%)"></span><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;color:#6b7079;text-align:center;line-height:1.5">ring<br>当前操作对象</span></div>
+            <div style="display:grid;gap:8px;justify-items:center"><span style="display:block;width:72px;height:56px;background:#fff;border:1px solid #d8d9dd;border-radius:8px;box-shadow:var(--ink-stage-shadow)"></span><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;color:#6b7079;text-align:center;line-height:1.5">stage-shadow<br>真实场景工作台</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div style="display:grid;gap:16px;margin-top:-36px" id="stage-samples">
+    <p class="ds-note">主区方格：72 × 72px，1px 线，偏移 −1px −1px；左右栏维持 surface 背景。静态投影用于语聊房和 1V1 呼叫工作台，普通输入区仍为描边结构。</p>
+    <p class="ds-note">1V1 体验路径为四项：发起或接收呼叫、响应呼叫邀请、建立真实音频、结束通话。首项在主叫发送邀请成功或被叫消费有效邀请时完成。主叫发送成功后显示“对方正在响铃”，被叫显示来电，不发送额外振铃回执。响应任务只计有效的接听或拒绝，不计取消、挂断和自动忙线；结束任务在清理后回到空闲时完成，不要求切换麦克风。RTM 自动登录不作为体验任务，进度按四项计算。</p>
+    <p class="ds-note">1V1 的所有终态在 RTC 清理完成后自动回到 IDLE，结束原因保留在拨号表单标题区，说明为“可以发起或接听新的呼叫。”。拨号与昵称编辑立即可用；“完成”使用次要线框按钮，只收起提示，不阻塞新呼叫。</p>
+    <p class="ds-note">邀请 publish 失败返回后立即结束，不自动重试；本地 CONNECTED 显示“对方不在线”，其他连接状态显示“本地网络异常，呼叫失败”。断线蒙层显示同一本地网络错误，恢复连接后可重新发起。30 秒截止用于已发送邀请的未接听等待，过期接听不启动 RTC。</p>
+    <p class="ds-note">30 秒未接通时，主叫结束提示为“对方无应答”，被叫为“邀请已过期”；被叫等待 ACK 同样保留原截止计时器，到期自行回到空闲。再次呼叫使用新的 callId。</p>
+    <p class="ds-note">生产场景导航整页跳转，当前页面只拥有当前场景的一个 RTM Client。主题偏好保留；体验进度、数据流与侧栏折叠态重置。页面离开时尽力清理，历史缓存恢复时重新加载；本原型只模拟视图切换。</p>
+    <p class="ds-note">1V1 呼叫主状态使用大写下划线：IDLE、OUTGOING_SENDING、OUTGOING_RINGING、INCOMING_RINGING、ACCEPTING、MEDIA_CONNECTING、ACTIVE；状态标签直接展示该值。每次邀请独立实例，结束直接 IDLE 并显示原因，后台清理不阻塞新邀请，不展示 ENDING。主叫和被叫分别维护本地状态，不要求同时处于相同状态。</p>
+    <p class="ds-note">发送中不显示接听倒计时；邀请发送成功后，主叫从 30s 开始等待。被叫收到邀请后从自己的 30s 开始，接听与重发不重新计时。</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px">
+      <div class="ds-grid" data-theme="light"><div class="ds-stage"><strong>LIGHT · 场景工作台</strong><p class="ds-code">--ink-grid: #ececee<br>--ink-stage-shadow:<br>0 1px 2px rgba(17,18,20,.04),<br>0 12px 32px -8px rgba(17,18,20,.12)</p></div></div>
+      <div class="ds-grid" data-theme="dark"><div class="ds-stage"><strong>DARK · 场景工作台</strong><p class="ds-code">--ink-grid: #1a1b1e<br>--ink-stage-shadow:<br>0 1px 2px rgba(0,0,0,.4),<br>0 12px 32px -8px rgba(0,0,0,.6)</p></div></div>
+    </div>
+  </div>
+
+  <!-- 04 组件 -->
+  <section id="comp" style="display:grid;grid-template-columns:minmax(200px,220px) minmax(0,1fr);gap:40px">
+    <div style="display:grid;gap:8px;align-content:start"><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.1em;color:#6b7079">04</span><h2 style="margin:0;font-size:20px;font-weight:700;letter-spacing:-.02em">组件</h2><p style="margin:0;color:#5f6368">按钮四级：墨、线框、危险、渐变描边。标签、输入、芯片、资源链接、麦位卡、Toast。</p></div>
+    <div style="display:grid;gap:40px">
+      <div style="display:grid;gap:12px"><span style="font-weight:600">按钮 · Button</span>
+        <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+          <button style="height:38px;padding:0 16px;border:0;border-radius:6px;background:#111214;color:#fff;font:inherit;font-weight:600;cursor:pointer">主要 · 发送</button>
+          <button style="height:38px;padding:0 16px;border:1px solid #e6e7ea;border-radius:6px;background:#fff;color:#111214;font:inherit;font-weight:500;cursor:pointer">次要 · 暂时离开</button>
+          <button style="height:38px;padding:0 16px;border:1px solid #111214;border-radius:6px;background:#fff;color:#111214;font:inherit;font-weight:600;cursor:pointer">强调线框 · 申请上麦</button>
+          <button style="height:38px;padding:0 16px;border:1px solid #e6e7ea;border-radius:6px;background:#fff;color:#c8362f;font:inherit;font-weight:500;cursor:pointer">危险 · 解散房间</button>
+          <a href="#" style="position:relative;display:flex;align-items:center;gap:8px;padding:0 14px;height:38px;border-radius:6px;color:#111214;text-decoration:none;font-weight:700;font-size:12px;white-space:nowrap;isolation:isolate;background:linear-gradient(135deg,#38bdf8,#8b5cf6,#ee5a9a,#f6a34a,#38bdf8,#8b5cf6,#ee5a9a,#f6a34a,#38bdf8);background-size:200% 200%;animation:lab-flow 3s linear infinite"><span style="position:absolute;inset:1.5px;z-index:-1;border-radius:4.5px;background:#fff"></span>渐变描边 · 前往 Console<span style="font-family:ui-monospace,monospace">↗</span></a>
+          <button style="height:38px;padding:0 16px;border:0;border-radius:6px;background:#e6e7ea;color:#a3a7ae;font:inherit;font-weight:600;cursor:not-allowed">禁用</button>
+          <button style="height:28px;padding:0 10px;border:1px solid #111214;border-radius:6px;background:#111214;color:#fff;font:inherit;font-size:12px;cursor:pointer">小 · 同意</button>
+          <a href="#" style="font-size:12px;text-decoration:none;color:#5f6368">文字 · 踢出</a><a href="#" style="font-size:12px;text-decoration:none;color:#c8362f">文字危险 · 封禁</a><a href="https://bitbucket.agoralab.co/users/zhouxueqin_agora.io/repos/new-rtm-demo/browse/src/scenes/voice-room/README.md" target="_blank" rel="noreferrer" style="font-size:12px;text-decoration:none;color:#111214">资源 · Demo 源码 <span style="font-family:ui-monospace,monospace;color:#a3a7ae">↗</span></a>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:40px">
+        <div style="display:grid;gap:12px"><span style="font-weight:600">输入 · Input</span>
+          <div style="display:grid;gap:10px">
+            <input placeholder="说点什么…" style="height:46px;padding:0 12px;border:1px solid #e6e7ea;border-radius:6px;background:#fff;font:inherit;outline:none;color:#111214">
+            <input value="周五晚间语聊" style="height:38px;padding:0 12px;border:1px solid #111214;border-radius:6px;background:#fff;font:inherit;outline:none;color:#111214;box-shadow:0 0 0 3px rgb(17 18 20 / 10%)">
+            <div style="display:flex;gap:6px"><input placeholder="写一句欢迎语…" style="flex:1;min-width:0;height:38px;padding:0 12px;border:1px solid #e6e7ea;border-radius:6px;background:#fff;font:inherit;outline:none;color:#111214"><button style="height:38px;padding:0 12px;border:1px solid #111214;border-radius:6px;background:#111214;color:#fff;font:inherit;font-weight:500;cursor:pointer">发布</button></div>
+          </div>
+        </div>
+        <div style="display:grid;gap:12px"><span style="font-weight:600">标签 / 芯片 · Tag / Chip</span>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace">
+            <span style="font-size:10px;letter-spacing:.1em;padding:3px 7px;border:1px solid #111214;border-radius:3px;font-weight:600">HOST</span>
+            <span style="font-size:10px;letter-spacing:.1em;padding:3px 7px;border:1px solid #111214;border-radius:3px;font-weight:600">AUDIENCE</span>
+            <span style="font-size:10px;letter-spacing:.06em;color:#5f6368;padding:1px 5px;border:1px solid #dcdee2;border-radius:3px;background:transparent">REMOTE_JOIN</span>
+            <span style="font-size:10px;letter-spacing:.06em;color:#6b7079;padding:2px 6px;border:1px dashed #c4c7cc;border-radius:3px">尚未构建</span>
+            <span style="font-size:10px;letter-spacing:.04em;color:#1f8a5b">SPEAKING</span>
+            <span style="font-size:10px;letter-spacing:.04em;color:#8b8f96">OPEN</span>
+            <button style="display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border:1px solid #e6e7ea;border-radius:999px;background:#fff;color:#111214;font:inherit;font-size:11px;cursor:pointer"><span style="width:8px;height:8px;border-radius:50%;background:#2fa98a;display:block"></span>API <span style="color:#8b8f96">5</span></button>
+            <button style="display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border:1px solid #e6e7ea;border-radius:999px;background:#fff;color:#111214;font:inherit;font-size:11px;cursor:pointer"><span style="width:8px;height:8px;border-radius:50%;background:#3d7fc2;display:block"></span>EVENT <span style="color:#8b8f96">4</span></button>
+          </div>
+          <span style="font-weight:600;margin-top:12px">任务流 · Steps</span>
+          <ol style="list-style:none;margin:0 0 0 4px;padding:0 0 0 16px;display:grid;border-left:1px solid #e6e7ea;font-size:13px">
+            <li style="position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:9px 0"><span style="position:absolute;left:-20px;top:50%;width:7px;height:7px;margin-top:-3.5px;border-radius:50%;background:#1f8a5b;box-shadow:0 0 0 3px #fff"></span><span>建立房间连接</span><span style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#1f8a5b"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"></path></svg>已完成</span></li>
+            <li style="position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:9px 0"><span style="position:absolute;left:-20px;top:50%;width:7px;height:7px;margin-top:-3.5px;border-radius:50%;background:#dcdee2;box-shadow:0 0 0 3px #fff"></span><span>申请与审批上麦</span><span style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#a3a7ae"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"></path></svg>待体验</span></li>
+          </ol>
+          <span style="font-weight:600;margin-top:12px">导航 · Nav</span>
+          <div style="display:flex;gap:4px;height:44px;border-bottom:1px solid #e6e7ea;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:12px">
+            <a href="#" style="display:flex;align-items:center;gap:6px;padding:0 12px;text-decoration:none;color:#111214;font-weight:600;border-bottom:2px solid #111214;margin-bottom:-1px;white-space:nowrap"><span style="color:#6b7079;font-weight:500">01</span>语聊房</a>
+            <a href="#" style="display:flex;align-items:center;gap:6px;padding:0 12px;text-decoration:none;color:#5f6368;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap"><span style="color:#a3a7ae">02</span>1V1呼叫邀请</a>
+            <a href="#" style="display:flex;align-items:center;gap:6px;padding:0 12px;text-decoration:none;color:#5f6368;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap"><span style="color:#a3a7ae">03</span>电商直播</a>
+          </div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:40px">
+        <div style="display:grid;gap:12px"><span style="font-weight:600">麦位卡 · Seat</span>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:132px;gap:12px">
+            <div style="display:grid;align-content:center;justify-items:center;gap:10px;padding:12px;border:1px solid #e6e7ea;border-radius:10px;background:#fff;position:relative">
+              <span class="ds-crown" title="房主" role="img" aria-label="房主"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18h18l1-11-5.5 4L12 4l-4.5 7L2 7z"></path></svg></span>
+              <span style="display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:#111214;color:#fff;font-weight:600;font-size:15px;animation:lab-seatbreathe 1.8s ease-in-out infinite">H</span>
+              <span style="display:grid;gap:3px;justify-items:center"><strong style="font-weight:600">Host</strong><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.04em;color:#111214">SPEAKING</span></span>
+            </div>
+            <div style="display:grid;align-content:center;justify-items:center;gap:10px;padding:12px;border:1px solid #111214;border-radius:10px;background:#fff;position:relative;box-shadow:0 0 0 3px rgb(17 18 20 / 10%)">
+              <span style="position:absolute;top:8px;left:10px;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;color:#8b8f96">02</span>
+              <span style="display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:#111214;color:#fff;font-weight:600;font-size:15px">鹿</span>
+              <span style="display:grid;gap:3px;justify-items:center"><strong style="font-weight:600">小鹿</strong><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.04em;color:#1f8a5b">MIC ON</span></span>
+            </div>
+            <div style="display:grid;align-content:center;justify-items:center;gap:10px;padding:12px;border:1px dashed #dcdee2;border-radius:10px;position:relative">
+              <span style="position:absolute;top:8px;left:10px;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;color:#8b8f96">03</span>
+              <span style="display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:#f3f4f6;color:#8b8f96;font-weight:600;font-size:15px">+</span>
+              <span style="display:grid;gap:3px;justify-items:center"><strong style="font-weight:600;color:#6b7079">空麦位</strong><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.04em;color:#8b8f96">OPEN</span></span>
+            </div>
+          </div>
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;color:#6b7079">22px 皇冠位于 top −12px / left 8px，上缘 surface 衬底；不显示“房主”文字，保留可访问说明。说话头像 1.8s 呼吸 · 仅选中卡片 ring · 空位虚线。</span>
+        </div>
+        <div style="display:grid;gap:12px"><span style="font-weight:600">分节标题 / Toast / 上下文卡 · Notice</span>
+          <div style="display:grid;gap:10px">
+            <div style="display:grid;gap:8px;padding-top:12px;border-top:1px solid #e6e7ea"><div style="display:flex;align-items:baseline;gap:10px"><span style="font-weight:600">公告</span><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;color:#6b7079">PINNED</span></div><p style="margin:0;font-size:12px;line-height:1.6">今晚一起聊聊 RTM 在语聊房里的最佳实践 · 22:00 前欢迎随时申请上麦。</p><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;color:#6b7079">与「麦位」「公屏」同级：横线分隔 + 标题行 + 正文，不使用卡片底色</span></div>
+            <div style="display:flex;align-items:center;gap:12px;padding-top:12px;border-top:1px solid #e6e7ea"><button style="display:flex;align-items:center;gap:7px;height:28px;padding:0 10px;border:1px solid #e6e7ea;border-radius:14px;background:#fff;color:#5f6368;font:inherit;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.08em;cursor:pointer"><span style="display:block;width:11px;height:11px;border-radius:50%;border:1px solid #111214;background:#111214"></span>LIGHT</button><button style="display:flex;align-items:center;gap:7px;height:28px;padding:0 10px;border:1px solid #2a2b2f;border-radius:14px;background:#141517;color:#a3a7ae;font:inherit;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.08em;cursor:pointer"><span style="display:block;width:11px;height:11px;border-radius:50%;border:1px solid #f2f2f3;background:transparent"></span>DARK</button><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;color:#6b7079">主题切换 · 顶栏右侧，实心=浅色，空心=深色</span></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid #111214;border-radius:8px;background:#fff"><span><strong style="font-weight:600">房主邀请你上麦</strong> <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;color:#6b7079;margin-left:6px;white-space:nowrap">SEAT 03 · 18s</span></span><span style="display:flex;gap:4px;flex:none"><button style="flex:none;white-space:nowrap;height:28px;padding:0 10px;border:1px solid #111214;border-radius:6px;background:#111214;color:#fff;font:inherit;font-size:12px;cursor:pointer">接受</button><button style="flex:none;white-space:nowrap;height:28px;padding:0 10px;border:1px solid #e6e7ea;border-radius:6px;background:#fff;color:#5f6368;font:inherit;font-size:12px;cursor:pointer">拒绝</button></span></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid #e6e7ea;border-radius:8px;background:#fff"><span style="width:8px;height:8px;border-radius:50%;background:#1f8a5b;display:block;flex:none"></span><span>已发布公告</span><span style="margin-left:auto;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;color:#6b7079">storage.setChannelMetadata · 78ms</span></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid #e6e7ea;border-radius:8px;background:#fff"><span style="width:8px;height:8px;border-radius:50%;background:#c8362f;display:block;flex:none"></span><span>连接已断开，正在重连</span><span style="margin-left:auto;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;color:#c8362f">RECONNECTING</span></div>
+            <div style="padding:12px 14px;border:1px solid #111214;border-radius:8px;background:#fff;display:grid;gap:10px"><div style="display:flex;justify-content:space-between"><span style="font-weight:600">已选 · 02 小鹿</span><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;color:#1f8a5b;letter-spacing:.06em">SPEAKING</span></div><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px"><button style="height:32px;border:1px solid #e6e7ea;border-radius:6px;background:#fff;font:inherit;font-size:12px;cursor:pointer">静音</button><button style="height:32px;border:1px solid #e6e7ea;border-radius:6px;background:#fff;font:inherit;font-size:12px;cursor:pointer">下麦</button><button style="height:32px;border:1px solid #e6e7ea;border-radius:6px;background:#fff;font:inherit;font-size:12px;color:#c8362f;cursor:pointer">踢出</button></div></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-top:1px solid #e6e7ea;background:#fff"><span>在线听众 · 小鹿</span><span style="display:flex;gap:10px;font-size:12px"><button style="border:0;padding:0;background:none;font:inherit;color:#5f6368">邀请上麦</button><button style="border:0;padding:0;background:none;font:inherit;color:#5f6368">踢出</button><button style="border:0;padding:0;background:none;font:inherit;color:#c8362f">封禁</button></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="nickname" style="display:grid;grid-template-columns:minmax(200px,220px) minmax(0,1fr);gap:40px;margin-top:-28px">
+    <div><h3 style="margin:0 0 8px;font-size:18px">昵称与公屏</h3><p class="ds-note">2026-09-08 增量。昵称是展示文本，用户操作目标始终是 UID；公屏保留完整消息历史。</p></div>
+    <div style="display:grid;gap:24px">
+      <div class="ds-nickname-grid">
+        <div class="ds-nickname-card"><span class="ds-code">CREATE · HOST</span><label>你的昵称（选填）<input aria-label="设计系统房主昵称" data-ds-nickname="host" aria-describedby="ds-host-nickname-hint" aria-invalid="false" placeholder="例如：小明" onInput="{{ validateNickname }}"></label><p id="ds-host-nickname-hint">不填使用 Host；最多 20 个字符</p></div>
+        <div class="ds-nickname-card"><span class="ds-code">JOIN · AUDIENCE</span><label>你的昵称（选填）<input aria-label="设计系统观众昵称" data-ds-nickname="audience" aria-describedby="ds-audience-nickname-hint" aria-invalid="false" placeholder="例如：小雨" onInput="{{ validateNickname }}"></label><p id="ds-audience-nickname-hint">不填自动分配昵称；最多 20 个字符</p></div>
+      </div>
+      <p class="ds-note">最多 20 个 Unicode 码点；NFC 规范化、去首尾空白，内部空格与大小写保留。中文、标点、Emoji 可用；组合 Emoji 按组成码点计数。换行、控制字符和非法代理字符报错。两个字段独立，空白回退角色默认昵称，IME 组合确认 Enter 不提前提交。昵称写入既有 URL data 与 Presence；刷新恢复相同 UID / 昵称，入房后不改名。此处为独立输入校验示例；提交、IME 与原始粘贴处理以生产入口为准。</p>
+      <div style="border-top:1px solid var(--ink-line);padding-top:14px;display:grid;gap:8px"><strong>重名示例：小明 / 小明</strong><span class="ds-code">展示：小明 · UID user-demo-a<br>展示：小明 · UID user-demo-b</span><p class="ds-note">原昵称都保持“小明”；上面 UID 仅为设计说明。产品不追加同名后缀；邀请、审批、静音、封禁按各自行的 UID 定位。</p></div>
+      <div id="chat-sample" style="border-top:1px solid var(--ink-line);padding-top:12px"><div style="display:flex;justify-content:space-between;margin-bottom:12px"><strong>公屏</strong><span class="ds-code">完整历史 · 可滚动</span></div><div class="ds-chat-feed" tabindex="0" aria-label="设计系统公屏完整历史"><sc-for list="{{ chatMessages }}" as="m"><p><strong>{{ m.name }}</strong> <span>{{ m.text }}</span></p></sc-for></div></div>
+      <p class="ds-note">公屏最大高度 calc(7.5em + 4 × 11px) = 141.5px（13px 字体、19.5px 单行 × 5 + 4 个间距）。短记录一次约五条；长文自动换行，内部滚动保留全部历史，不能只截取最后五条。新消息到达仍滚到底部。</p>
+    </div>
+  </section>
+
+  <!-- 05 时间线 -->
+  <section id="trace" style="display:grid;grid-template-columns:minmax(200px,220px) minmax(0,1fr);gap:40px">
+    <div style="display:grid;gap:8px;align-content:start"><span class="ds-code">05</span><h2 style="margin:0;font-size:20px">时间线节点</h2><p class="ds-note">最新记录在顶部，API 与 EVENT 按时间倒序交错呈现；筛选后保持倒序。新记录、筛选变更或重新展开时定位列表顶部。API 薄荷、EVENT 天蓝。surface 行底始终不变，类型色只用于 3px 左框、API / EVENT 标签和短暂光晕。行内取消色点列，筛选胶囊继续保留色点与计数。</p></div>
+    <div style="display:grid;gap:18px;min-width:0">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><span class="ds-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12h4l3-8 4 16 3-8h6"/></svg>RTM 数据流</span><button class="ds-pill" onClick="{{ replayMotion }}">重播呼吸</button></div>
+      <div class="ds-pills"><button class="ds-pill" data-kind="api" aria-pressed="{{ apiPicked }}" onClick="{{ filterApi }}"><span class="ds-pill-dot"></span>API <span>3</span></button><button class="ds-pill" data-kind="event" aria-pressed="{{ eventPicked }}" onClick="{{ filterEvent }}"><span class="ds-pill-dot"></span>EVENT <span>2</span></button></div>
+      <ol class="ds-traces" aria-label="设计系统数据流">
+        <sc-for list="{{ traces }}" as="t" hint-placeholder-count="5">
+          <li class="ds-trace" data-kind="{{ t.kind }}" data-failed="{{ t.failed }}" title="{{ t.fullSummary }}" tabindex="0">
+            <time>{{ t.time }}</time><div class="ds-trace-body"><div class="ds-trace-head"><span class="ds-trace-kind">{{ t.kindLabel }}</span><span class="ds-trace-name" title="{{ t.name }}">{{ t.name }}</span><sc-if value="{{ t.tag }}"><span class="ds-trace-tag">{{ t.tag }}</span></sc-if><sc-if value="{{ t.dur }}"><span class="ds-trace-duration">{{ t.dur }}</span></sc-if></div><div class="ds-trace-summary"><span class="ds-trace-summary-text">{{ t.summary }}</span><sc-if value="{{ t.failed }}"><span class="ds-trace-error"><code>{{ t.code }}</code><span>{{ t.error }}</span></span></sc-if></div></div><span class="ds-trace-detail">{{ t.fullSummary }}</span>
+          </li>
+        </sc-for>
+      </ol>
+      <p class="ds-note">最小 70px = 上下 padding 28px + 首行 18px + 间隔 4px + 一行详情 18px + 边框 2px。时间列 86px，正文 minmax(0,1fr)，列间距 10px，行间距 10px。长 API 名在首行省略；第二行摘要和失败详情完整换行，条目随内容增高。</p>
+      <p class="ds-note">生产通过行 title 提供完整摘要与错误信息。此设计页额外提供 hover / 键盘 focus 全文预览便于核对，不要求生产新增 tooltip 组件。标题不显示分类总数；仅筛选胶囊展示各类计数，折叠栏继续显示总记录数。</p>
+      <div class="ds-code" style="padding:16px;border:1px solid var(--ink-line);border-radius:6px">lab-rowin .35s ease-out<br>lab-rowbreathe 1.8s ease-in-out .3s 2<br>峰值：类型色外框 + 0 0 10px 0 color-mix(in oklab, 类型色 35%, transparent)<br>终态：1px line 外框 + 3px 类型色左框；行底不变<br>prefers-reduced-motion: reduce → animation: none</div>
+    </div>
+  </section>
+
+  <!-- 06 图标 -->
+  <section id="icon" style="display:grid;grid-template-columns:minmax(200px,220px) minmax(0,1fr);gap:40px">
+    <div style="display:grid;gap:8px;align-content:start"><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.1em;color:#6b7079">06</span><h2 style="margin:0;font-size:20px;font-weight:700;letter-spacing:-.02em">图标方案</h2><p style="margin:0;color:#5f6368">24 网格线性图标。左右栏标题专用路线 / 脉冲图标为 16px、描边 1.8、文字间距 8px，aria-hidden。其余功能图标沿用原尺寸。实心皇冠为 22px，位于麦位上缘，仅图形标识房主并保留可访问说明。</p></div>
+    <div style="display:grid;gap:24px">
+      <div style="display:flex;flex-wrap:wrap;gap:24px"><span class="ds-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15"/><path d="M15 6v15"/></svg>建议体验流程</span><span class="ds-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12h4l3-8 4 16 3-8h6"/></svg>RTM 数据流</span></div>
+      <div style="display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:12px">
+        <sc-for list="{{ icons }}" as="i" hint-placeholder-count="8">
+          <div style="display:grid;gap:8px;justify-items:center;padding:16px 8px;border:1px solid #e6e7ea;border-radius:8px;background:#fff"><span style="display:grid;place-items:center;width:20px;height:20px" data-svg="{{ i.svg }}"></span><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;color:#6b7079">{{ i.name }}</span></div>
+        </sc-for>
+      </div>
+      <div style="display:flex;gap:24px;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:12px;color:#111214"><span>↗ <span style="color:#6b7079">外链</span></span><span>→ <span style="color:#6b7079">前往 / 指向</span></span><span>✓ <span style="color:#6b7079">已完成</span></span><span>▾ <span style="color:#6b7079">展开</span></span><span>· <span style="color:#6b7079">分隔</span></span></div>
+    </div>
+  </section>
+
+  <!-- 07 暗色 -->
+  <section id="dark" style="display:grid;grid-template-columns:minmax(200px,220px) minmax(0,1fr);gap:40px">
+    <div style="display:grid;gap:8px;align-content:start"><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.1em;color:#6b7079">07</span><h2 style="margin:0;font-size:20px;font-weight:700;letter-spacing:-.02em">暗色映射</h2><p style="margin:0;color:#5f6368">灰阶反转，语义类型色提亮；数据流始终使用 surface，主区方格与卡片投影独立映射。渐变不变。当前完整原型见 <a href="Lab.dc.html">Lab</a>，历史 Redesign 仅作过程参考。</p></div>
+    <div style="display:grid;gap:24px">
+      <div style="display:grid;border-top:1px solid #e6e7ea">
+        <sc-for list="{{ darkMap }}" as="d" hint-placeholder-count="10">
+          <div style="display:grid;grid-template-columns:220px 24px 100px 24px 100px minmax(0,1fr);gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid #f0f1f3;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px"><span style="font-size:12px">{{ d.name }}</span><span style="display:block;width:24px;height:24px;border-radius:5px;background:{{ d.light }};border:1px solid #e6e7ea"></span><span style="color:#6b7079">{{ d.light }}</span><span style="display:block;width:24px;height:24px;border-radius:5px;background:{{ d.dark }};border:1px solid #e6e7ea"></span><span style="color:#6b7079">{{ d.dark }}</span><span style="color:#8b8f96;font-family:-apple-system,'PingFang SC',sans-serif;font-size:12px">{{ d.note }}</span></div>
+        </sc-for>
+      </div>
+      <div class="ds-grid" data-theme="dark" id="dark-current-sample"><div class="ds-stage" style="display:grid;gap:24px">
+        <div style="display:grid;grid-template-columns:132px minmax(0,1fr);gap:24px"><div class="ds-seat"><span class="ds-crown" title="房主" role="img" aria-label="房主"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18h18l1-11-5.5 4L12 4l-4.5 7L2 7z"/></svg></span><strong>🌟 小明</strong><span class="ds-code">MIC ON</span></div><p class="ds-note">深色仍用 surface 的卡片和数据流行底。API #7fdcc3 / EVENT #8ab9e6；grid #1a1b1e；皇冠以 surface 衬底跨在麦位上缘。</p></div>
+        <ol class="ds-traces" aria-label="深色数据流示例"><li class="ds-trace" data-kind="event" tabindex="0" title="announcement 更新，revision 4"><time>21:05:09.131</time><div class="ds-trace-body"><div class="ds-trace-head"><span class="ds-trace-kind">EVENT</span><span class="ds-trace-name">storage</span><span class="ds-trace-tag">UPDATE</span></div><div class="ds-trace-summary"><span class="ds-trace-summary-text">announcement 更新，revision 4</span></div></div><span class="ds-trace-detail">announcement 更新，revision 4</span></li><li class="ds-trace" data-kind="api" tabindex="0" title="更新公告成功，向当前房间成员同步"><time>21:05:09.045</time><div class="ds-trace-body"><div class="ds-trace-head"><span class="ds-trace-kind">API</span><span class="ds-trace-name">storage.setChannelMetadata</span><span class="ds-trace-duration">78ms</span></div><div class="ds-trace-summary"><span class="ds-trace-summary-text">更新公告成功，向当前房间成员同步</span></div></div><span class="ds-trace-detail">更新公告成功，向当前房间成员同步</span></li></ol>
+      </div></div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { traceFilter:'all' };
+  filterApi = () => this.setState({traceFilter:this.state.traceFilter==='api'?'all':'api'});
+  filterEvent = () => this.setState({traceFilter:this.state.traceFilter==='event'?'all':'event'});
+  replayMotion = () => { document.querySelectorAll('.ds-trace').forEach(el=>{el.style.animation='none';void el.offsetWidth;el.style.animation='';}); };
+  validateNickname = (event) => {
+    const input=event.target, value=input.value.normalize('NFC').trim();
+    const invalid=/[\p{Cc}\p{Cs}\p{Zl}\p{Zp}]/u.test(input.value)
+      || [...input.value].some(character=>{const cp=character.codePointAt(0);return /\p{Cf}/u.test(character)&&!(cp===0x200c||cp===0x200d||(cp>=0xe0020&&cp<=0xe007f));})
+      || (value&&!/[\p{L}\p{N}\p{P}\p{S}]/u.test(value));
+    const error=invalid?'昵称不能包含换行或不可见控制字符':[...value].length>20?'昵称最多 20 个字符':'';
+    input.setAttribute('aria-invalid',String(!!error));
+    const hint=document.getElementById(input.getAttribute('aria-describedby'));
+    hint.textContent=error||(input.dataset.dsNickname==='host'?'不填使用 Host；最多 20 个字符':'不填自动分配昵称；最多 20 个字符');
+    hint.dataset.error=String(!!error);
+  };
+  componentDidMount() { this.inject(); }
+  componentDidUpdate() { this.inject(); }
+  inject() { document.querySelectorAll('[data-svg]').forEach((el) => { if (!el.childElementCount && el.dataset.svg) el.innerHTML = el.dataset.svg; }); }
+  renderVals() {
+    const mono = "ui-monospace,'SF Mono',Menlo,Consolas,monospace", sans = "-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif";
+    const neutrals = [['ink','#111214'],['gray-900','#2a2b2f'],['gray-700','#5f6368'],['gray-600','#6b7079'],['gray-500','#8b8f96'],['gray-400','#a3a7ae'],['gray-200','#e6e7ea'],['gray-100','#f0f1f3']].map(([name,hex])=>({name,hex}));
+    const tokens = [
+      ['bg.canvas','#fafafa','页面底'],['grid','#ececee','主区 72px 方格线（1px）'],['bg.surface','#ffffff','面板 / 卡片'],['bg.subtle','#fbfbfc','次级面板（右侧管理区）'],['bg.code','#f6f7f8','代码块'],
+      ['fg.primary','#111214','正文 / 标题 / 主要按钮'],['fg.secondary','#5f6368','说明文字'],['fg.mono','#6b7079','等宽元信息（时间、编号）'],['fg.disabled','#a3a7ae','占位 / 禁用'],
+      ['line.default','#e6e7ea','分隔线 / 默认描边'],['line.subtle','#f0f1f3','列表行分隔'],['line.ink','#111214','选中 / 焦点描边'],
+      ['success','#1f8a5b','连接成功 / MIC ON'],['danger','#c8362f','解散 / 封禁 / 断连'],['trace.api','#2fa98a','API 左框 / 标签 / 筛选色点'],['trace.api.bg','#a7e5d3','legacy wash 兼容值，不作当前行底'],['trace.event','#3d7fc2','EVENT 左框 / 标签 / 筛选色点'],['trace.event.bg','#a8c8e8','legacy wash 兼容值，不作当前行底'],
+    ].map(([name,hex,use])=>({name,hex,use}));
+    const type = [
+      { token:'display', spec:'Sans 700 · 40 / -0.03em', family:sans, size:40, weight:700, ls:'-.03em', color:'#111214', sample:'墨 · Ink' },
+      { token:'h1', spec:'Sans 700 · 32 / -0.025em', family:sans, size:32, weight:700, ls:'-.025em', color:'#111214', sample:'语聊房：麦位与房内互动' },
+      { token:'h2 · 房间标题', spec:'Sans 700 · 22 / -0.02em', family:sans, size:22, weight:700, ls:'-.02em', color:'#111214', sample:'周五晚间语聊' },
+      { token:'h3 · 面板标题', spec:'Sans 700 · 16 / -0.01em', family:sans, size:16, weight:700, ls:'-.01em', color:'#111214', sample:'RTM 数据流' },
+      { token:'label', spec:'Sans 600 · 13', family:sans, size:13, weight:600, ls:'0', color:'#111214', sample:'麦位 · 排麦申请 · 在线听众' },
+      { token:'body', spec:'Sans 500 · 13 / 1.5', family:sans, size:13, weight:500, ls:'0', color:'#111214', sample:'今晚一起聊聊 RTM 在语聊房里的最佳实践' },
+      { token:'body-sm', spec:'Sans 500 · 12 / 1.6', family:sans, size:12, weight:500, ls:'0', color:'#5f6368', sample:'治理动作是客户端协作行为，生产环境需服务端校验。' },
+      { token:'mono · API 名', spec:'Mono 600 · 12', family:mono, size:12, weight:600, ls:'0', color:'#111214', sample:'storage.setChannelMetadata · rtm.subscribe · rtm.publish' },
+      { token:'mono · 导航 / 时间', spec:'Mono 500 · 11–12 / +0.02em', family:mono, size:12, weight:500, ls:'.02em', color:'#6b7079', sample:'01 语聊房 · 21:05:09.045 · uid 7f3a · 2 / 8' },
+      { token:'mono · 状态标签', spec:'Mono 600 · 10 / +0.1em', family:mono, size:10, weight:600, ls:'.1em', color:'#111214', sample:'HOST · SPEAKING · REMOTE_JOIN · 01 / 场景任务' },
+    ];
+    const spaces = [4,8,12,16,24,32,48].map((px)=>({px}));
+    const radii = [[3,'标签'],[6,'按钮 / 输入'],[8,'面板 / 卡片'],[10,'麦位卡'],[999,'芯片']].map(([px,use])=>({px,use}));
+    const allTraces = [
+      { time:'21:05:03.618',kind:'event',name:'message',tag:'',dur:'',summary:'seat.request from 小鹿：申请 2 号麦位' },
+      { time:'21:05:09.045',kind:'api',name:'storage.setChannelMetadata',tag:'',dur:'78ms',summary:'seats：2 号麦位分配给小鹿；仅变更归属，不改变媒体结果' },
+      { time:'21:05:09.131',kind:'event',name:'storage',tag:'UPDATE',dur:'',summary:'hostUserId=小周, announcement=大家好, seats=1号麦 小周, 2号麦 小明, 3号麦 空, 4号麦 空, forcedMutedUserIds=空' },
+      { time:'21:05:22.480',kind:'api',name:'rtm.publish',tag:'MESSAGE',dur:'41ms',summary:'voice-room-...-b0fa: to ALL chat.message' },
+      { time:'21:05:24.610',kind:'api',name:'storage.setChannelMetadata',tag:'',dur:'3000ms',summary:'同步房间公告',code:'-11001',error:'请求超时，请检查网络后重试；完整错误码和错误信息仍在同一条记录中保留。',failed:true },
+    ].map(t=>({...t,kindLabel:t.kind.toUpperCase(),failed:!!t.failed,fullSummary:[t.summary,t.failed ? t.code+' '+t.error : ''].filter(Boolean).join('\n')}));
+    const traces = allTraces.filter(t=>this.state.traceFilter==='all'||t.kind===this.state.traceFilter).reverse();
+    const chatMessages = [
+      {name:'🌟 小明',text:'欢迎来到语聊房。'},{name:'小雨 🎧',text:'先试试申请上麦。'},
+      {name:'小明',text:'这是保留在历史里的第三条消息。'},{name:'小鹿',text:'公告已经更新。'},
+      {name:'🌟 小明',text:'第五条单行消息。'},{name:'小雨 🎧',text:'第六条仍在列表里，可以上下滚动查看。'},
+      {name:'小鹿',text:'这一条较长的消息用于验证自然换行：公屏只限制可视高度，保留完整文字与消息历史，不按五条切断数组；长段落会占用多行，并通过同一个内部滚动区阅读。'}
+    ];
+    const sv = (d) => `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111214" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+    const icons = [
+      { name:'gift', svg: sv('<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/>') },
+      { name:'heart', svg: sv('<path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7z"/>') },
+      { name:'mic', svg: sv('<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4"/>') },
+      { name:'mic-off', svg: sv('<path d="M2 2l20 20"/><path d="M9 9v3a3 3 0 0 0 5.1 2.1"/><path d="M15 9.3V5a3 3 0 0 0-5.9-.7"/><path d="M5 10a7 7 0 0 0 11.5 5.4"/><path d="M19 10a7 7 0 0 1-.6 2.8"/><path d="M12 17v4"/>') },
+      { name:'user-plus', svg: sv('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/>') },
+      { name:'door', svg: sv('<path d="M13 4h3a2 2 0 0 1 2 2v14"/><path d="M2 20h3"/><path d="M13 20h9"/><path d="M10 12v.01"/><path d="M13 4.6v16.8a1 1 0 0 1-1.2 1L5 21V5l6.8-1.4a1 1 0 0 1 1.2 1z"/>') },
+      { name:'activity', svg: sv('<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>') },
+      { name:'crown 22px', svg: '<svg width="22" height="22" viewBox="0 0 24 24" fill="#111214"><path d="M3 18h18l1-11-5.5 4L12 4l-4.5 7L2 7z"/></svg>' },
+    ];
+    const darkMap = [
+      ['bg.canvas','#fafafa','#0f1012','页面底'],['grid','#ececee','#1a1b1e','主区 72px 方格'],['bg.surface','#ffffff','#141517','面板'],['bg.subtle','#fbfbfc','#1b1c1f','次级面板 / 麦位卡'],
+      ['fg.primary','#111214','#f2f2f3','正文反转'],['fg.secondary','#5f6368','#a3a7ae','说明文字提亮'],['fg.mono','#6b7079','#a3a7ae','时间与元信息'],['fg.mono2','#8b8f96','#8b8f96','次级元信息 / 耗时'],
+      ['line.default','#e6e7ea','#2a2b2f','分隔线'],['line.ink','#111214','#f2f2f3','选中描边反转'],
+      ['success','#1f8a5b','#3fb27f','提亮一档'],['danger','#c8362f','#e5534b','提亮一档'],['trace.api','#2fa98a','#7fdcc3','左框 / 标签 / 筛选色点'],['trace.api.bg','#a7e5d3','#1e4a3f','legacy wash，不用于行底'],['trace.event','#3d7fc2','#8ab9e6','左框 / 标签 / 筛选色点'],['trace.event.bg','#a8c8e8','#1f3550','legacy wash，不用于行底'],
+    ].map(([name,light,dark,note])=>({name,light,dark,note}));
+    return { neutrals, tokens, type, spaces, radii, traces, icons, darkMap, chatMessages, apiPicked:this.state.traceFilter==='api', eventPicked:this.state.traceFilter==='event', filterApi:this.filterApi, filterEvent:this.filterEvent, replayMotion:this.replayMotion, validateNickname:this.validateNickname };
+  }
+}
+</script>
+</body>
+</html>

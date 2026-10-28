@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RTM 在线体验馆 · 当前实现参考原型</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Helvetica Neue",Helvetica,sans-serif;font-weight:500}
+.lab-shell a{color:var(--lab-fg)}.lab-shell a:hover{color:var(--lab-fg2)}
+.lab-shell,.lab-shell *{box-sizing:border-box}
+.lab-shell input::placeholder{color:var(--lab-disabled)}
+.lab-shell button:disabled{opacity:.45;cursor:not-allowed!important}.lab-shell button,.lab-shell input{font:inherit}.lab-shell button:focus-visible,.lab-shell input:focus-visible,.lab-shell [tabindex]:focus-visible{outline:2px solid var(--lab-fg);outline-offset:2px}
+.lab-shell{width:100%;height:100dvh;min-height:0}.lab-topbar{min-width:0}.lab-nav{overflow:auto;white-space:nowrap;scrollbar-width:none}.lab-nav a{flex:none}.lab-workspace{min-width:0;grid-template-rows:minmax(0,1fr)}
+.lab-path,.lab-timeline{min-width:0}.lab-path{grid-column:1}.lab-timeline{grid-column:3}.lab-body{grid-column:2;overflow:auto;grid-template-rows:minmax(0,1fr)}.lab-title{display:flex;align-items:center;gap:8px;white-space:nowrap;min-width:0}.lab-title svg{flex:none}.lab-timeline-head{min-width:0;flex-wrap:wrap}.lab-timeline-actions{flex:none;margin-left:auto;white-space:nowrap}.lab-action{border:0;background:transparent;padding:0;color:var(--lab-fg2);cursor:pointer;font:inherit}
+.lab-room{min-width:0}.lab-room-header{min-width:0}.lab-room-header h1{overflow:hidden;text-overflow:ellipsis;min-width:0}.lab-stage,.lab-seats,.lab-seat{min-width:0}.lab-seat-avatar{flex:none}.lab-crown{position:absolute;top:-12px;left:8px;padding:0 2px;border-radius:3px;background:var(--lab-surface);display:inline-flex;align-items:center;line-height:0;color:var(--lab-fg)}
+.lab-chat{min-height:0;display:grid;align-content:end}.lab-chat-feed{min-height:0;max-height:141.5px;overflow:auto;display:flex;flex-direction:column;gap:11px;font-size:13px}.lab-chat-feed p{margin:0;flex:none;min-height:1.5em;line-height:1.5;word-break:break-word}.lab-chat-feed strong{font-weight:600}.lab-entry{overflow:auto;align-content:safe center!important}.lab-entry input{min-width:0;width:100%}.lab-entry-choices{min-width:0}.lab-entry-card{min-width:0;align-content:start}.lab-entry h1{overflow-wrap:anywhere}.lab-drawer-backdrop{display:none}
+.lab-trace{min-height:70px;min-width:0;display:grid;grid-template-columns:86px minmax(0,1fr);gap:0 10px;padding:14px 12px;border:1px solid var(--lab-line);border-left:3px solid var(--trace-color);border-radius:6px;background:var(--lab-surface);position:relative}.lab-trace[data-failed="true"]{box-shadow:inset 0 0 0 1px var(--lab-danger)}.lab-trace-head{display:flex;align-items:center;gap:8px;height:18px;line-height:18px;min-width:0;white-space:nowrap}.lab-trace-kind{flex:none;color:var(--trace-color);font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;font-weight:600;letter-spacing:.1em}.lab-trace-name{min-width:0;overflow:hidden;text-overflow:ellipsis;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:12px;font-weight:600}.lab-trace-tag{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;font:10px ui-monospace,'SF Mono',Menlo,Consolas,monospace;letter-spacing:.06em;padding:1px 5px;border:1px solid var(--lab-dash);border-radius:3px;line-height:14px;color:var(--lab-fg2)}.lab-trace-summary{display:grid;grid-template-columns:minmax(0,1fr);gap:2px;min-width:0;margin-top:4px;color:var(--lab-fg2);font-size:12px;line-height:18px;white-space:normal;overflow:visible}.lab-trace-summary-text{min-width:0;width:100%;overflow-wrap:anywhere}.lab-trace-error{display:flex;flex-wrap:wrap;min-width:0;width:100%;max-width:100%;font:11px ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:var(--lab-danger);align-items:baseline;gap:6px;white-space:normal}.lab-trace-error code{flex:none}.lab-trace-error span{min-width:0;overflow-wrap:anywhere}
+@media(max-width:1279px){.lab-topbar{gap:24px!important;padding:0 20px!important}}
+@media(max-width:760px){.lab-shell{height:auto;min-height:100dvh;overflow:visible!important}.lab-topbar{gap:12px!important;padding:0 12px!important;position:sticky;top:0;z-index:60;height:56px}.lab-brand-sub,.lab-connection{display:none!important}.lab-workspace{position:relative;grid-template-columns:48px minmax(0,1fr) 48px!important;grid-template-rows:auto}.lab-body{padding:12px!important;overflow:visible;grid-template-rows:auto}.lab-path[data-open="true"]{position:fixed;top:56px;bottom:0;left:0;width:min(252px,calc(100vw - 48px));z-index:51}.lab-timeline[data-open="true"]{position:fixed;top:56px;bottom:0;right:0;width:min(420px,calc(100vw - 48px));z-index:51}.lab-drawer-backdrop{display:block;position:fixed;inset:56px 0 0;z-index:50;border:0;padding:0;background:var(--lab-scrim)}.lab-room{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto auto auto auto!important;min-height:calc(100dvh - 80px)}.lab-room-header{min-height:64px;padding:10px 14px!important;flex-wrap:wrap}.lab-stage{padding:14px!important;grid-template-rows:auto auto auto auto auto minmax(160px,1fr)!important}.lab-seats{grid-auto-rows:104px!important;gap:8px!important}.lab-seat{gap:6px!important;padding:8px!important}.lab-seat-avatar{width:36px!important;height:36px!important}.lab-seat-hint{display:none}.lab-composer{padding:10px 14px 14px!important}.lab-composer form{display:grid!important;grid-template-columns:38px 38px minmax(0,1fr) auto;grid-template-rows:46px 38px;height:auto!important}.lab-composer input{grid-column:1 / -2;grid-row:1;width:100%!important}.lab-send{grid-column:-2 / -1;grid-row:1}.lab-gift,.lab-heart,.lab-mic-action{grid-row:2}.lab-mic-action{grid-column:3 / -1;justify-self:end}.lab-room-panel{grid-column:1!important;grid-row:4!important;border-left:0!important;border-top:1px solid var(--lab-line);padding:14px!important;overflow:visible!important}.lab-entry{padding:20px!important;overflow:visible}.lab-entry-choices{grid-template-columns:minmax(0,1fr)!important}.lab-entry-card{padding:14px!important}.lab-entry h1{font-size:26px!important}.lab-entry-intro{gap:10px!important}.lab-call-workbench{min-height:calc(100dvh - 80px)}.lab-call-body{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto minmax(360px,1fr)}.lab-call-body>aside{border-right:0!important;border-bottom:1px solid var(--lab-line)}}
+@keyframes lab-flow{to{background-position:200% 200%}}
+@keyframes lab-ripple{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.45);opacity:0}}
+@keyframes lab-rowin{0%{opacity:0;transform:translateY(-6px)}100%{opacity:1;transform:none}}
+@keyframes lab-rowbreathe{0%,100%{border-color:var(--lab-line);border-left-color:var(--trace-color);box-shadow:0 0 0 0 transparent}50%{border-color:var(--trace-color);box-shadow:0 0 10px 0 color-mix(in oklab,var(--trace-color) 35%,transparent)}}
+@keyframes lab-seatbreathe{0%,100%{box-shadow:0 0 0 0 var(--ink0),0 0 0 0 var(--ink0)}50%{box-shadow:0 0 0 0 var(--ink0),0 0 12px 1px var(--ink4)}}
+@media(prefers-reduced-motion:reduce){.lab-shell *{animation:none!important;scroll-behavior:auto!important}}
+</style>
+</helmet>
+<div class="lab-shell" data-view="{{ currentView }}" data-theme="{{ themeName }}" style="--lab-danger:{{ T.danger }};--lab-dash:{{ T.dash }};--lab-disabled:{{ T.disabled }};--lab-fg:{{ T.fg }};--lab-fg2:{{ T.fg2 }};--lab-line:{{ T.line }};--lab-scrim:{{ T.scrim }};--lab-surface:{{ T.surface }};background:{{ T.canvas }};color:{{ T.fg }};overflow:hidden;display:grid;grid-template-rows:56px minmax(0,1fr);font-size:{{ v.fs }}px;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei','Helvetica Neue',Helvetica,sans-serif">
+  <!-- 顶栏 -->
+  <header class="lab-topbar" style="display:flex;align-items:center;gap:40px;padding:0 28px;background:{{ T.surface }};border-bottom:1px solid {{ T.line }}">
+    <div style="display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;letter-spacing:-.01em;white-space:nowrap">RTM<span class="lab-brand-sub" style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-weight:500;font-size:11px;color:{{ T.mono }};letter-spacing:.04em;padding-left:10px;border-left:1px solid {{ T.line }}">在线体验馆</span></div>
+    <nav class="lab-nav" aria-label="场景导航" style="display:flex;align-items:stretch;gap:4px;height:100%;flex:1;min-width:0;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:12px;letter-spacing:.02em">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="7">
+        <a href="#" onClick="{{ n.open }}" style="display:flex;align-items:center;gap:6px;padding:0 12px;text-decoration:none;color:{{ n.color }};font-weight:{{ n.weight }};border-bottom:2px solid {{ n.border }};margin-bottom:-1px"><span style="color:{{ n.numColor }};font-weight:500">{{ n.num }}</span>{{ n.label }}</a>
+      </sc-for>
+    </nav>
+    <div style="display:flex;align-items:center;gap:16px">
+      <div class="lab-connection" style="display:flex;align-items:center;gap:8px;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;color:{{ T.fg2 }}"><span style="color:{{ T.mono2 }}">RTM</span><span style="width:6px;height:6px;border-radius:50%;background:{{ connDot }};display:block"></span>{{ connLabel }}</div>
+      <button onClick="{{ toggleTheme }}" title="{{ themeTitle }}" style="display:flex;align-items:center;gap:7px;height:28px;padding:0 10px;border:1px solid {{ T.line }};border-radius:14px;background:{{ T.surface }};color:{{ T.fg2 }};font:inherit;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.08em;cursor:pointer" style-hover="border-color:{{ T.dashStrong }};color:{{ T.fg }}">
+        <span style="display:block;width:11px;height:11px;border-radius:50%;border:1px solid {{ T.fg }};background:{{ T.themeSwatch }}"></span>{{ themeLabel }}
+      </button>
+    </div>
+  </header>
+
+  <div class="lab-workspace" style="display:grid;grid-template-columns:{{ leftW }}px minmax(0,1fr) {{ rightW }}px;gap:0;min-height:0">
+    <!-- 体验路径 -->
+    <sc-if value="{{ leftOpen }}"><button class="lab-drawer-backdrop" aria-label="收起体验路径" onClick="{{ toggleLeft }}"></button></sc-if>
+    <aside class="lab-path" data-open="{{ leftOpen }}" aria-label="体验路径" style="border-right:1px solid {{ T.line }};background:{{ T.surface }};min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr)">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:{{ v.pad }}px {{ leftPadX }}px 0;min-width:0">
+        <sc-if value="{{ leftOpen }}" hint-placeholder-val="{{ true }}"><span class="lab-title" style="font-weight:700;font-size:{{ v.h2 }}px;letter-spacing:-.01em"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"></path><path d="M9 3v15M15 6v15"></path></svg>建议体验流程</span></sc-if>
+        <button onClick="{{ toggleLeft }}" title="{{ leftTitle }}" style="display:grid;place-items:center;width:28px;height:28px;flex:none;margin-left:auto;border:1px solid {{ T.line }};border-radius:6px;background:{{ T.surface }};color:{{ T.fg2 }};cursor:pointer;padding:0"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="transform:{{ leftIconFlip }}"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M9 4v16"></path></svg></button>
+      </div>
+      <sc-if value="{{ leftOpen }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:{{ v.gap }}px {{ v.padX }}px {{ v.pad }}px;display:flex;flex-direction:column;gap:{{ v.pad }}px;min-height:0;overflow:auto">
+      <section>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.06em;color:{{ T.mono }}"><span>01 / 场景任务</span><span style="color:{{ T.fg }}">{{ progressLabel }}</span></div>
+        <sc-if value="{{ hasSteps }}" hint-placeholder-val="{{ true }}">
+          <div style="margin-top:12px;height:2px;background:{{ T.track }};border-radius:1px;overflow:hidden"><span style="display:block;height:100%;width:{{ progressPct }}%;background:linear-gradient(90deg,#f6a34a,#ee5a9a,#8b5cf6,#38bdf8)"></span></div>
+          <ol style="list-style:none;margin:{{ v.gap }}px 0 0 4px;padding:0 0 0 16px;display:grid;grid-template-columns:minmax(0,1fr);border-left:1px solid {{ T.line }}">
+            <sc-for list="{{ steps }}" as="st" hint-placeholder-count="5">
+              <li style="position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:{{ v.rowP }}px 0">
+                <span style="position:absolute;left:-20px;top:50%;width:7px;height:7px;margin-top:-3.5px;border-radius:50%;background:{{ st.dot }};box-shadow:0 0 0 3px {{ T.surface }}"></span>
+                <span style="color:{{ st.color }};font-weight:{{ st.weight }};line-height:1.3">{{ st.title }}</span>
+                <span style="display:inline-flex;align-items:center;gap:4px;font-size:{{ v.fsSm }}px;color:{{ st.statusColor }};white-space:nowrap"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"></path></svg>{{ st.status }}</span>
+              </li>
+            </sc-for>
+          </ol>
+        </sc-if>
+        <sc-if value="{{ isPlaceholder }}" hint-placeholder-val="{{ false }}">
+          <p style="margin:12px 0 0;color:{{ T.mono }};font-size:{{ v.fsSm }}px;line-height:1.7">{{ sceneName }}的体验任务正在准备中。先到语聊房完成一次真实互动。</p>
+          <a href="#" onClick="{{ leaveRoom }}" style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;padding:{{ v.rowP }}px 0;border-top:1px solid {{ T.lineSubtle }};border-bottom:1px solid {{ T.lineSubtle }};text-decoration:none;color:{{ T.fg }};font-size:{{ v.fsSm }}px">前往语聊房<span style="font-family:ui-monospace,monospace;color:{{ T.faint }}">→</span></a>
+        </sc-if>
+      </section>
+      <section style="border-top:1px solid {{ T.line }};padding-top:{{ v.pad }}px">
+        <div style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.06em;color:{{ T.mono }}">02 / 开始构建</div>
+        <a href="#" style="margin-top:12px;position:relative;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 14px;height:{{ v.btnH }}px;border-radius:6px;color:{{ T.fg }};text-decoration:none;font-weight:700;font-size:{{ v.fsSm }}px;white-space:nowrap;isolation:isolate;background:linear-gradient(135deg,#38bdf8,#8b5cf6,#ee5a9a,#f6a34a,#38bdf8,#8b5cf6,#ee5a9a,#f6a34a,#38bdf8);background-size:200% 200%;animation:lab-flow 3s linear infinite"><span style="position:absolute;inset:1.5px;z-index:-1;border-radius:4.5px;background:{{ T.surface }}"></span>前往 Console 创建项目<span style="font-family:ui-monospace,monospace">↗</span></a>
+      </section>
+      <section style="border-top:1px solid {{ T.line }};padding-top:{{ v.pad }}px">
+        <div style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.06em;color:{{ T.mono }}">03 / 开发文档</div>
+        <div style="display:grid;margin-top:8px">
+          <a href="#" style="display:flex;justify-content:space-between;align-items:center;padding:{{ v.rowP }}px 0;border-bottom:1px solid {{ T.lineSubtle }};text-decoration:none;color:{{ T.fg }}">产品简介<span style="color:{{ T.faint }};font-family:ui-monospace,monospace">↗</span></a>
+          <a href="#" style="display:flex;justify-content:space-between;align-items:center;padding:{{ v.rowP }}px 0;border-bottom:1px solid {{ T.lineSubtle }};text-decoration:none;color:{{ T.fg }}">最佳实践<span style="color:{{ T.faint }};font-family:ui-monospace,monospace">↗</span></a>
+          <a href="#" style="display:flex;justify-content:space-between;align-items:center;padding:{{ v.rowP }}px 0;border-bottom:1px solid {{ T.lineSubtle }};text-decoration:none;color:{{ T.fg }}">API 参考<span style="color:{{ T.faint }};font-family:ui-monospace,monospace">↗</span></a>
+          <a href="https://bitbucket.agoralab.co/users/zhouxueqin_agora.io/repos/new-rtm-demo/browse/src/scenes/voice-room/README.md" target="_blank" rel="noreferrer" style="display:flex;justify-content:space-between;align-items:center;padding:{{ v.rowP }}px 0;text-decoration:none;color:{{ T.fg }}">Demo 源码<span style="color:{{ T.faint }};font-family:ui-monospace,monospace">↗</span></a>
+        </div>
+      </section>
+      </div>
+      </sc-if>
+      <sc-if value="{{ leftClosed }}" hint-placeholder-val="{{ false }}"><div style="display:grid;place-items:start center;padding-top:8px"><span style="writing-mode:vertical-rl;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.14em;color:{{ T.mono }}">建议体验流程 · {{ progressLabel }}</span></div></sc-if>
+    </aside>
+
+    <!-- 主区 -->
+    <main class="lab-body" style="min-width:0;min-height:0;padding:{{ v.pad }}px;display:grid;background-color:{{ T.canvas }};background-image:linear-gradient({{ T.grid }} 1px,transparent 1px),linear-gradient(90deg,{{ T.grid }} 1px,transparent 1px);background-size:72px 72px;background-position:-1px -1px">
+
+      <!-- ▸ 房间（房主 / 听众） -->
+      <sc-if value="{{ isRoom }}" hint-placeholder-val="{{ true }}">
+      <section class="lab-room" style="box-shadow:{{ T.stageShadow }};display:grid;grid-template-columns:minmax(0,1fr) {{ panelW }}px;grid-template-rows:{{ v.hdrH }}px minmax(0,1fr) auto;background:{{ T.surface }};border:1px solid {{ T.line }};border-radius:8px;overflow:hidden;min-height:0">
+        <header class="lab-room-header" style="grid-column:1 / -1;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 {{ v.pad }}px;border-bottom:1px solid {{ T.line }}">
+          <div style="display:flex;align-items:center;gap:14px;min-width:0">
+            <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.1em;padding:3px 7px;border:1px solid {{ T.ink }};border-radius:3px;font-weight:600;color:{{ T.fg }}">{{ roleTag }}</span>
+            <h1 style="margin:0;font-size:{{ v.h1 }}px;font-weight:700;letter-spacing:-.02em;white-space:nowrap" title="{{ roomTitle }}">{{ roomTitle }}</h1>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex:none">
+            <sc-if value="{{ isHost }}" hint-placeholder-val="{{ true }}">
+              <button onClick="{{ leaveRoom }}" style="height:{{ v.btnH }}px;padding:0 14px;border:1px solid {{ T.line }};border-radius:6px;background:{{ T.surface }};color:{{ T.fg }};font:inherit;font-weight:500;cursor:pointer">暂时离开</button>
+              <button onClick="{{ dissolveRoom }}" style="height:{{ v.btnH }}px;padding:0 14px;border:1px solid {{ T.line }};border-radius:6px;background:{{ T.surface }};color:{{ T.danger }};font:inherit;font-weight:500;cursor:pointer">解散房间</button>
+            </sc-if>
+            <sc-if value="{{ isAudience }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ leaveRoom }}" style="height:{{ v.btnH }}px;padding:0 14px;border:1px solid {{ T.line }};border-radius:6px;background:{{ T.surface }};color:{{ T.fg }};font:inherit;font-weight:500;cursor:pointer">退出房间</button>
+            </sc-if>
+          </div>
+        </header>
+
+        <!-- 麦位舞台 -->
+        <section class="lab-stage" style="grid-column:1;grid-row:2;padding:{{ v.pad }}px;display:grid;grid-template-rows:auto auto auto auto auto minmax(0,1fr);gap:{{ v.gap }}px;min-height:0">
+          <div style="display:flex;justify-content:space-between;align-items:baseline">
+            <div style="display:flex;align-items:baseline;gap:10px"><span style="font-weight:600">麦位</span><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;color:{{ T.mono }}">2 / 8 · 4 ONLINE</span></div>
+            <span class="lab-seat-hint" style="font-size:{{ v.fsSm }}px;color:{{ T.mono }}">{{ seatHint }}</span>
+          </div>
+          <div class="lab-seats" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:132px;align-content:start;gap:{{ v.gap }}px">
+            <sc-for list="{{ seats }}" as="s" hint-placeholder-count="8">
+              <button class="lab-seat" aria-label="{{ s.ariaLabel }}" style="display:grid;align-content:center;justify-items:center;gap:10px;padding:12px;border:{{ s.borderW }}px {{ s.borderStyle }} {{ s.border }};border-radius:10px;background:{{ s.bg }};box-shadow:{{ s.ring }};--ink:{{ T.ink }};--ink0:{{ T.ink }}00;--ink4:{{ T.ink }}33;font:inherit;font-size:{{ v.fs }}px;cursor:pointer;min-height:0;position:relative;color:{{ T.fg }}">
+                <span class="lab-seat-avatar" style="position:relative;display:grid;place-items:center;width:{{ v.avatar }}px;height:{{ v.avatar }}px;animation:{{ s.anim }}">
+                  
+                  
+                  <span style="position:relative;display:grid;place-items:center;width:100%;height:100%;border-radius:50%;background:{{ s.avBg }};color:{{ s.avColor }};font-weight:600;font-size:15px">{{ s.av }}</span>
+                </span>
+                <sc-if value="{{ s.isHost }}" hint-placeholder-val="{{ true }}"><span class="lab-crown" role="img" aria-label="房主" title="房主"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 18h18l1-11-5.5 4L12 4l-4.5 7L2 7z"></path></svg></span></sc-if>
+                <span style="display:grid;gap:3px;justify-items:center;min-width:0;max-width:100%"><strong style="font-weight:600;color:{{ s.nameColor }};max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ s.name }}</strong><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.04em;color:{{ s.subColor }}">{{ s.sub }}</span></span>
+                <sc-if value="{{ s.showNum }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;top:8px;left:10px;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;color:{{ T.mono2 }}">{{ s.n }}</span></sc-if>
+              </button>
+            </sc-for>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;padding-top:{{ v.gap }}px;border-top:1px solid {{ T.line }}">
+            <div style="display:flex;align-items:baseline;gap:10px"><span style="font-weight:600">公告</span><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;color:{{ T.mono }}">PINNED</span></div>
+          </div>
+          <p style="margin:0;color:{{ T.fg }};line-height:1.6;font-size:{{ v.fsSm }}px">今晚一起聊聊 RTM 在语聊房里的最佳实践 · 22:00 前欢迎随时申请上麦。</p>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;padding-top:{{ v.gap }}px;border-top:1px solid {{ T.line }}">
+            <div style="display:flex;align-items:baseline;gap:10px"><span style="font-weight:600">公屏</span><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;color:{{ T.mono }}">{{ chatCount }} MESSAGES</span></div>
+          </div>
+          <div class="lab-chat">
+            <div class="lab-chat-feed" ref="{{ chatRef }}" role="region" aria-label="公屏消息，可上下滚动" tabIndex="0">
+              <sc-for list="{{ chat }}" as="m" hint-placeholder-count="6">
+                <p style="color:{{ m.color }}"><strong style="color:{{ m.whoColor }}">{{ m.who }}</strong> {{ m.text }}</p>
+              </sc-for>
+            </div>
+          </div>
+        </section>
+
+        <!-- 输入条 -->
+        <section class="lab-composer" style="grid-column:1;grid-row:3;display:grid;grid-template-columns:minmax(0,1fr);padding:{{ v.gap }}px {{ v.pad }}px {{ v.pad }}px;border-top:1px solid {{ T.line }};min-width:0">
+          <form onSubmit="{{ submitChat }}" style="display:flex;align-items:center;gap:8px;min-height:46px;min-width:0">
+            <button type="button" title="Emoji" style="flex:none;display:grid;place-items:center;width:{{ v.btnH }}px;height:{{ v.btnH }}px;border:1px solid {{ T.line }};border-radius:6px;background:{{ T.surface }};padding:0;cursor:pointer">😊</button>
+            <button class="lab-gift" type="button" title="送礼物" onClick="{{ actGift }}" style="flex:none;display:grid;place-items:center;width:{{ v.btnH }}px;height:{{ v.btnH }}px;border:1px solid {{ T.line }};border-radius:6px;background:{{ T.surface }};padding:0;cursor:pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{ T.fg }}" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"></rect><path d="M12 8v13"></path><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"></path><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"></path></svg></button>
+            <button class="lab-heart" type="button" title="点赞" onClick="{{ actLike }}" style="flex:none;display:grid;place-items:center;width:{{ v.btnH }}px;height:{{ v.btnH }}px;border:1px solid {{ T.line }};border-radius:6px;background:{{ T.surface }};padding:0;cursor:pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{ T.fg }}" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7z"></path></svg></button>
+            <input aria-label="聊天内容" value="{{ chatDraft }}" onChange="{{ editChat }}" onKeyDown="{{ chatKeyDown }}" placeholder="说点什么…" style="flex:1 1 0;min-width:0;width:0;height:46px;padding:0 12px;border:1px solid {{ T.line }};border-radius:6px;background:{{ T.surface }};font:inherit;outline:none;color:{{ T.fg }}">
+            <button class="lab-send" type="submit" disabled="{{ sendDisabled }}" style="flex:none;height:{{ v.btnH }}px;white-space:nowrap;padding:0 16px;border:0;border-radius:6px;background:{{ c.accent }};color:{{ c.onAccent }};font:inherit;font-weight:600;cursor:pointer">发送</button>
+            <sc-if value="{{ isHost }}" hint-placeholder-val="{{ true }}"><button class="lab-mic-action" type="button" onClick="{{ actSelfMute }}" style="flex:none;height:{{ v.btnH }}px;white-space:nowrap;padding:0 12px;border:1px solid {{ T.line }};border-radius:6px;background:{{ T.surface }};font:inherit;cursor:pointer;color:{{ T.fg }}">闭麦</button></sc-if>
+            <sc-if value="{{ isAudience }}" hint-placeholder-val="{{ false }}"><button class="lab-mic-action" type="button" onClick="{{ actApply }}" style="flex:none;height:{{ v.btnH }}px;white-space:nowrap;padding:0 14px;border:1px solid {{ T.ink }};border-radius:6px;background:{{ T.surface }};font:inherit;font-weight:600;cursor:pointer;color:{{ T.fg }}">申请上麦</button></sc-if>
+          </form>
+        </section>
+
+        <!-- 右侧面板 -->
+        <aside class="lab-room-panel" style="grid-column:2;grid-row:2 / 4;border-left:1px solid {{ T.line }};background:{{ T.subtle }};padding:{{ v.pad }}px;overflow:auto;min-height:0;display:grid;grid-template-columns:minmax(0,1fr);align-content:start;gap:{{ v.pad }}px">
+          <sc-if value="{{ isHost }}" hint-placeholder-val="{{ true }}">
+            <section style="border:1px solid {{ T.ink }};border-radius:8px;padding:14px;background:{{ T.surface }};display:grid;gap:12px">
+              <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:600">已选 · 02 小鹿</span><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.06em;color:{{ T.success }}">SPEAKING</span></div>
+              <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px">
+                <button onClick="{{ actMute }}" style="min-width:0;padding:0;height:32px;border:1px solid {{ T.line }};border-radius:6px;background:{{ T.surface }};font:inherit;font-size:12px;cursor:pointer;color:{{ T.fg }}">静音</button>
+                <button style="min-width:0;padding:0;height:32px;border:1px solid {{ T.line }};border-radius:6px;background:{{ T.surface }};font:inherit;font-size:12px;cursor:pointer;color:{{ T.fg }}">下麦</button>
+                <button style="min-width:0;padding:0;height:32px;border:1px solid {{ T.line }};border-radius:6px;background:{{ T.surface }};font:inherit;font-size:12px;color:{{ T.danger }};cursor:pointer">踢出</button>
+              </div>
+            </section>
+            <section>
+              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px"><span style="font-weight:600">排麦申请</span><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;color:{{ T.fg }}">1 等待</span></div>
+              <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:{{ v.rowP }}px 0;border-top:1px solid {{ T.line }};border-bottom:1px solid {{ T.line }}">
+                <div style="display:grid;gap:2px;min-width:0"><strong style="font-weight:600">阿明</strong><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;color:{{ T.mono }}">→ SEAT 03 · 25s</span></div>
+                <div style="display:flex;gap:4px;flex:none"><button onClick="{{ actApprove }}" style="height:28px;padding:0 8px;border:1px solid {{ T.ink }};border-radius:6px;background:{{ T.ink }};color:{{ T.onInk }};font:inherit;font-size:12px;cursor:pointer">同意</button><button style="height:28px;padding:0 8px;border:1px solid {{ T.line }};border-radius:6px;background:{{ T.surface }};color:{{ T.fg2 }};font:inherit;font-size:12px;cursor:pointer">拒绝</button></div>
+              </div>
+            </section>
+            <section>
+              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px"><span style="font-weight:600">更新公告</span></div>
+              <div style="display:flex;gap:6px;min-width:0"><input placeholder="写一句欢迎语…" style="flex:1 1 0;min-width:0;width:0;height:{{ v.btnH }}px;padding:0 10px;border:1px solid {{ T.line }};border-radius:6px;background:{{ T.surface }};font:inherit;outline:none;color:{{ T.fg }}"><button onClick="{{ actAnnounce }}" style="height:{{ v.btnH }}px;padding:0 12px;border:1px solid {{ T.ink }};border-radius:6px;background:{{ T.ink }};color:{{ T.onInk }};font:inherit;font-weight:500;cursor:pointer">发布</button></div>
+            </section>
+            <section>
+              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font-weight:600">在线听众</span><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;color:{{ T.mono }}">3</span></div>
+              <sc-for list="{{ onlineAudience }}" as="a" hint-placeholder-count="3">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:{{ v.rowP }}px 0;border-top:1px solid {{ T.lineSubtle }}"><span>{{ a }}</span><span style="display:flex;gap:10px;font-size:12px"><a href="#" style="text-decoration:none;color:{{ T.fg2 }}">邀请上麦</a><a href="#" style="text-decoration:none;color:{{ T.fg2 }}">踢出</a><a href="#" style="text-decoration:none;color:{{ T.danger }}">封禁</a></span></div>
+              </sc-for>
+            </section>
+          </sc-if>
+          <sc-if value="{{ isAudience }}" hint-placeholder-val="{{ false }}">
+            <section style="border:1px solid {{ T.ink }};border-radius:8px;padding:14px;background:{{ T.surface }};display:grid;gap:12px">
+              <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:600">房主邀请你上麦</span><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.06em;color:{{ T.mono }}">SEAT 03 · 18s</span></div>
+              <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px">
+                <button style="min-width:0;padding:0;height:32px;border:1px solid {{ T.ink }};border-radius:6px;background:{{ T.ink }};color:{{ T.onInk }};font:inherit;font-size:12px;cursor:pointer">接受</button>
+                <button style="min-width:0;padding:0;height:32px;border:1px solid {{ T.line }};border-radius:6px;background:{{ T.surface }};font:inherit;font-size:12px;cursor:pointer;color:{{ T.fg }}">拒绝</button>
+              </div>
+            </section>
+            <section>
+              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px"><span style="font-weight:600">我的状态</span></div>
+              <div style="display:grid;gap:0">
+                <div style="display:flex;justify-content:space-between;padding:{{ v.rowP }}px 0;border-top:1px solid {{ T.lineSubtle }}"><span style="color:{{ T.fg2 }}">身份</span><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px">AUDIENCE</span></div>
+                <div style="display:flex;justify-content:space-between;padding:{{ v.rowP }}px 0;border-top:1px solid {{ T.lineSubtle }}"><span style="color:{{ T.fg2 }}">昵称</span><span title="{{ ownNickname }}" style="min-width:0;overflow-wrap:anywhere">{{ ownNickname }}</span></div>
+                <div style="display:flex;justify-content:space-between;padding:{{ v.rowP }}px 0;border-top:1px solid {{ T.lineSubtle }}"><span style="color:{{ T.fg2 }}">申请中</span><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;color:{{ T.mono }}">—</span></div>
+              </div>
+            </section>
+            <section>
+              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font-weight:600">在线听众</span><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;color:{{ T.mono }}">3</span></div>
+              <sc-for list="{{ onlineAudience }}" as="a" hint-placeholder-count="3">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:{{ v.rowP }}px 0;border-top:1px solid {{ T.lineSubtle }}"><span>{{ a }}</span></div>
+              </sc-for>
+            </section>
+          </sc-if>
+        </aside>
+      </section>
+      </sc-if>
+
+      <!-- ▸ 入口：本地交互示例，不连接 SDK -->
+      <sc-if value="{{ isEntry }}" hint-placeholder-val="{{ false }}">
+      <section class="lab-entry" style="background:{{ T.surface }};border:1px solid {{ T.line }};border-radius:8px;display:grid;align-content:center;justify-items:center;padding:{{ v.pad }}px">
+        <div style="width:100%;max-width:640px;display:grid;gap:36px">
+          <div class="lab-entry-intro" style="display:grid;gap:10px">
+            <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.1em;color:{{ T.mono }}">01 · VOICE ROOM</span>
+            <h1 style="margin:0;font-size:32px;font-weight:700;letter-spacing:-.025em;line-height:1.1">语聊房：麦位与房内互动</h1>
+            <p style="margin:0;color:{{ T.fg2 }};line-height:1.7;font-size:14px">一台设备创建房间成为房主，另一台输入相同名称加入成为听众。右侧数据流会实时记录每一次 RTM 调用与事件。</p>
+          </div>
+          <div class="lab-entry-choices" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px">
+            <section class="lab-entry-card" style="display:grid;gap:12px;padding:20px;border:1px solid {{ T.line }};border-radius:8px">
+              <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.1em;color:{{ T.mono }}">CREATE · HOST</span>
+              <label style="display:grid;gap:8px;font-weight:600">房间名称<input aria-label="房间标题" aria-describedby="host-room-hint" aria-invalid="{{ host.roomInvalid }}" value="{{ host.room }}" onChange="{{ host.editRoom }}" onKeyDown="{{ host.enter }}" placeholder="例如：周五晚间语聊" style="height:{{ v.btnH }}px;padding:0 12px;border:1px solid {{ T.line }};border-radius:6px;background:{{ T.surface }};font:inherit;font-weight:500;color:{{ T.fg }}"></label>
+              <p id="host-room-hint" style="margin:0;font-size:12px;line-height:1.6;color:{{ host.roomHintColor }}">{{ host.roomHint }}</p>
+              <label style="display:grid;gap:8px;font-weight:600">你的昵称（选填）<input aria-label="房主昵称" aria-describedby="host-nickname-hint" aria-invalid="{{ host.nicknameInvalid }}" value="{{ host.nickname }}" onChange="{{ host.editNickname }}" onPaste="{{ host.paste }}" onKeyDown="{{ host.enter }}" placeholder="例如：小明" style="height:{{ v.btnH }}px;padding:0 12px;border:1px solid {{ T.line }};border-radius:6px;background:{{ T.surface }};font:inherit;font-weight:500;color:{{ T.fg }}"></label>
+              <p id="host-nickname-hint" style="margin:0;font-size:12px;line-height:1.6;color:{{ host.nicknameHintColor }}">{{ host.nicknameHint }}</p>
+              <sc-if value="{{ canResumeHost }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ resumeHost }}" style="height:{{ v.btnH }}px;border:1px solid {{ T.ink }};background:{{ T.surface }};color:{{ T.fg }};border-radius:6px;font:inherit;font-weight:600;cursor:pointer">以 Host 身份返回</button></sc-if>
+              <button type="button" disabled="{{ host.disabled }}" onClick="{{ host.submit }}" style="height:{{ v.btnH }}px;border:0;background:{{ c.accent }};color:{{ c.onAccent }};border-radius:6px;font:inherit;font-weight:600;cursor:pointer">创建并进入</button>
+            </section>
+            <section class="lab-entry-card" style="display:grid;gap:12px;padding:20px;border:1px solid {{ T.line }};border-radius:8px">
+              <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.1em;color:{{ T.mono }}">JOIN · AUDIENCE</span>
+              <label style="display:grid;gap:8px;font-weight:600">房间名称<input aria-label="加入的房间名称" aria-describedby="audience-room-hint" aria-invalid="{{ audience.roomInvalid }}" value="{{ audience.room }}" onChange="{{ audience.editRoom }}" onKeyDown="{{ audience.enter }}" placeholder="输入房主告诉你的房间名称" style="height:{{ v.btnH }}px;padding:0 12px;border:1px solid {{ T.line }};border-radius:6px;background:{{ T.surface }};font:inherit;font-weight:500;color:{{ T.fg }}"></label>
+              <p id="audience-room-hint" style="margin:0;font-size:12px;line-height:1.6;color:{{ audience.roomHintColor }}">{{ audience.roomHint }}</p>
+              <label style="display:grid;gap:8px;font-weight:600">你的昵称（选填）<input aria-label="观众昵称" aria-describedby="audience-nickname-hint" aria-invalid="{{ audience.nicknameInvalid }}" value="{{ audience.nickname }}" onChange="{{ audience.editNickname }}" onPaste="{{ audience.paste }}" onKeyDown="{{ audience.enter }}" placeholder="例如：小雨" style="height:{{ v.btnH }}px;padding:0 12px;border:1px solid {{ T.line }};border-radius:6px;background:{{ T.surface }};font:inherit;font-weight:500;color:{{ T.fg }}"></label>
+              <p id="audience-nickname-hint" style="margin:0;font-size:12px;line-height:1.6;color:{{ audience.nicknameHintColor }}">{{ audience.nicknameHint }}</p>
+              <button type="button" disabled="{{ audience.disabled }}" onClick="{{ audience.submit }}" style="height:{{ v.btnH }}px;border:1px solid {{ T.ink }};background:{{ T.surface }};color:{{ T.fg }};border-radius:6px;font:inherit;font-weight:600;cursor:pointer">加入房间</button>
+            </section>
+          </div>
+          <p style="margin:0;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;color:{{ T.mono }};text-align:center;letter-spacing:.02em">使用耳机可获得更好的语音体验</p>
+        </div>
+      </section>
+      </sc-if>
+
+      <!-- ▸ 1V1 呼叫邀请：所有终态清理 RTC 后自动 IDLE，结果留在表单标题区；完成只收起提示，新呼叫无需确认。 -->
+      <sc-if value="{{ isCall }}" hint-placeholder-val="{{ false }}">
+      <section class="lab-call-workbench" style="box-shadow:{{ T.stageShadow }};display:grid;grid-template-rows:{{ v.hdrH }}px minmax(0,1fr);background:{{ T.surface }};border:1px solid {{ T.line }};border-radius:8px;overflow:hidden;min-height:0">
+        <header style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 {{ v.pad }}px;border-bottom:1px solid {{ T.line }}">
+          <div><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;color:{{ T.mono }}">1V1 · AUDIO CALL</span><h1 style="margin:3px 0 0;font-size:{{ v.h1 }}px;letter-spacing:0">呼叫、接听与真实音频</h1></div>
+          <span style="border:1px solid {{ T.line }};border-radius:3px;padding:5px 7px;color:{{ T.fg2 }};font:700 11px ui-monospace,'SF Mono',Menlo,Consolas,monospace">IDLE</span>
+        </header>
+        <div class="lab-call-body" style="display:grid;grid-template-columns:minmax(220px,280px) minmax(0,1fr);min-height:0">
+          <aside style="display:flex;flex-direction:column;gap:12px;padding:{{ v.pad }}px;border-right:1px solid {{ T.line }};background:{{ T.subtle }}">
+            <span style="font:700 11px ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:{{ T.mono }}">MY CALL ID</span>
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 38px;align-items:center;border:1px solid {{ T.line }};border-radius:6px;background:{{ T.code }};overflow:hidden"><code style="padding:0 11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">call-8a4f21c0d7e3</code><button title="复制呼叫 ID" style="display:grid;width:38px;height:38px;place-items:center;border:0;border-left:1px solid {{ T.line }};background:{{ T.surface }};color:{{ T.fg2 }}">⧉</button></div>
+            <label style="display:grid;gap:7px;color:{{ T.fg2 }};font-size:{{ v.fsSm }}px;font-weight:600">你的昵称（选填）<input placeholder="例如：小周" style="height:42px;border:1px solid {{ T.line }};border-radius:6px;padding:0 12px;background:{{ T.surface }};color:{{ T.fg }}"></label>
+          </aside>
+          <main style="display:grid;place-items:center;padding:48px;min-width:0">
+            <form style="display:grid;width:min(100%,460px);justify-items:center;gap:14px;text-align:center">
+              <div style="display:grid;width:48px;height:48px;place-items:center;border:1px solid {{ T.line }};border-radius:50%;background:{{ T.avEmpty }};font-size:20px">☎</div>
+              <div><span style="font:700 11px ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:{{ T.mono }}">READY</span><h2 style="margin:3px 0 0;font-size:20px;letter-spacing:0">呼叫另一位在线用户</h2><p style="margin:5px 0 0;color:{{ T.fg2 }}">输入对方页面显示的呼叫 ID。</p></div>
+              <label style="display:grid;width:100%;gap:7px;text-align:left;color:{{ T.fg2 }};font-size:{{ v.fsSm }}px;font-weight:600">对方呼叫 ID<input placeholder="call-xxxxxxxxxxxx" style="height:42px;border:1px solid {{ T.line }};border-radius:6px;padding:0 12px;background:{{ T.surface }};color:{{ T.fg }}"></label>
+              <button type="button" disabled style="height:{{ v.btnH }}px;padding:0 14px;border:0;border-radius:6px;background:{{ T.ink }};color:{{ T.onInk }};font-weight:600">发起呼叫</button>
+              <p style="margin:0;color:{{ T.mono }};font-size:12px;line-height:1.6">通话结束后自动空闲，可直接再次呼叫或接听；“完成”只收起结束提示。</p>
+            </form>
+          </main>
+        </div>
+      </section>
+      </sc-if>
+
+      <!-- ▸ 路线图占位 -->
+      <sc-if value="{{ isPlaceholder }}" hint-placeholder-val="{{ false }}">
+      <section style="background:{{ T.surface }};border:1px solid {{ T.line }};border-radius:8px;display:grid;align-content:center;justify-items:center;padding:{{ v.pad }}px">
+        <div style="width:100%;max-width:560px;display:grid;gap:28px">
+          <div style="display:grid;gap:10px">
+            <span style="display:flex;align-items:center;gap:10px;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.1em;color:{{ T.mono }}">{{ sceneNum }} · ROADMAP<span style="padding:2px 6px;border:1px dashed {{ T.dashStrong }};border-radius:3px;color:{{ T.mono }}">尚未构建</span></span>
+            <h1 style="margin:0;font-size:32px;font-weight:700;letter-spacing:-.025em;line-height:1.1">{{ sceneName }}</h1>
+            <p style="margin:0;color:{{ T.fg2 }};line-height:1.7;font-size:14px">{{ sceneDesc }}</p>
+          </div>
+          <div style="display:grid;gap:0">
+            <div style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.06em;color:{{ T.mono }};padding-bottom:8px">计划演示的 RTM 能力</div>
+            <sc-for list="{{ caps }}" as="cp" hint-placeholder-count="2">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid {{ T.line }}"><span style="font-weight:600">{{ cp.name }}</span><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;color:{{ T.mono }}">{{ cp.api }}</span></div>
+            </sc-for>
+            <div style="border-top:1px solid {{ T.line }}"></div>
+          </div>
+          <p style="margin:0;color:{{ T.mono }};font-size:12px;line-height:1.7">实验室先把它列出来，是为了说明 RTM 能覆盖到这里。想先看真实链路，请前往 <a href="#" onClick="{{ leaveRoom }}" style="font-weight:600;color:{{ T.fg }}">语聊房</a> —— 目前唯一已实现的场景。</p>
+        </div>
+      </section>
+      </sc-if>
+
+      <!-- ▸ App ID 引导 -->
+      <sc-if value="{{ isGuide }}" hint-placeholder-val="{{ false }}">
+      <section style="background:{{ T.surface }};border:1px solid {{ T.line }};border-radius:8px;display:grid;align-content:center;justify-items:center;padding:{{ v.pad }}px">
+        <div style="width:100%;max-width:560px;display:grid;gap:28px">
+          <div style="display:grid;gap:10px">
+            <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.1em;color:{{ T.danger }}">SETUP REQUIRED</span>
+            <h1 style="margin:0;font-size:32px;font-weight:700;letter-spacing:-.025em;line-height:1.1">还没有配置 App ID</h1>
+            <p style="margin:0;color:{{ T.fg2 }};line-height:1.7;font-size:14px">实验室需要一个声网 App ID 才能连接。按下面任一种方式配置后刷新页面。</p>
+          </div>
+          <section style="display:grid;gap:10px">
+            <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;color:{{ T.mono }}">A</span><span style="font-weight:600">本地开发</span><span style="color:{{ T.mono }};font-size:12px">仓库根目录 .env</span></div>
+            <pre style="margin:0;padding:14px 16px;background:{{ T.code }};border-radius:6px;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:12px;line-height:1.6;white-space:pre-wrap;word-break:break-all">VITE_APP_ID=你的 App ID</pre>
+          </section>
+          <section style="display:grid;gap:10px">
+            <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;color:{{ T.mono }}">B</span><span style="font-weight:600">线上部署</span><span style="color:{{ T.mono }};font-size:12px">上层页面在加载 bundle 前同步注入</span></div>
+            <pre style="margin:0;padding:14px 16px;background:{{ T.code }};border-radius:6px;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:12px;line-height:1.6;white-space:pre-wrap;word-break:break-all">&lt;script&gt;window.__ENV__ = { appId: '你的 App ID' };&lt;/script&gt;
+&lt;script type="module" src="/assets/index.js"&gt;&lt;/script&gt;</pre>
+          </section>
+        </div>
+      </section>
+      </sc-if>
+    </main>
+
+    <!-- 数据流时间线 -->
+    <sc-if value="{{ rightOpen }}"><button class="lab-drawer-backdrop" aria-label="收起数据流" onClick="{{ toggleRight }}"></button></sc-if>
+    <aside class="lab-timeline" data-open="{{ rightOpen }}" aria-label="RTM 数据流" style="border-left:1px solid {{ T.line }};background:{{ T.surface }};display:grid;grid-template-rows:auto auto minmax(0,1fr);min-height:0">
+      <sc-if value="{{ rightClosed }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;align-items:center;justify-content:center;padding:{{ v.pad }}px 0 0"><button onClick="{{ toggleRight }}" title="展开数据流" style="display:grid;place-items:center;width:28px;height:28px;border:1px solid {{ T.line }};border-radius:6px;background:{{ T.surface }};color:{{ T.fg2 }};cursor:pointer;padding:0"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="transform:scaleX(-1)"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M9 4v16"></path></svg></button></div>
+        <div style="display:grid;place-items:start center;padding-top:8px"><span style="writing-mode:vertical-rl;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.14em;color:{{ T.mono }}">RTM 数据流 · {{ traceCount }}</span></div>
+        <span></span>
+      </sc-if>
+      <sc-if value="{{ rightOpen }}" hint-placeholder-val="{{ true }}">
+      <div class="lab-timeline-head" style="padding:{{ v.pad }}px {{ v.pad }}px 0;display:flex;justify-content:space-between;align-items:center;gap:12px">
+        <span class="lab-title" style="font-weight:700;font-size:{{ v.h2 }}px;letter-spacing:-.01em"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12h4l3-8 4 16 3-8h6"></path></svg>RTM 数据流</span>
+        <div class="lab-timeline-actions" style="display:flex;align-items:center;gap:12px;font-size:12px"><button class="lab-action" onClick="{{ clearTraces }}">清空</button><button class="lab-action" onClick="{{ toggleConnection }}">{{ connectionAction }}</button><button onClick="{{ toggleRight }}" title="折叠数据流" style="display:grid;place-items:center;width:28px;height:28px;border:1px solid {{ T.line }};border-radius:6px;background:{{ T.surface }};color:{{ T.fg2 }};cursor:pointer;padding:0"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="transform:none"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M9 4v16"></path></svg></button></div>
+      </div>
+      <div style="display:flex;gap:6px;padding:12px {{ v.pad }}px;border-bottom:1px solid {{ T.line }};font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.02em">
+        <button onClick="{{ toggleApi }}" aria-pressed="{{ apiPressed }}" style="display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border:1px solid {{ apiBorder }};border-radius:999px;background:{{ T.surface }};color:{{ T.fg }};font:inherit;cursor:pointer"><span style="width:8px;height:8px;border-radius:50%;background:{{ P.apiDot }};display:block"></span>API <span style="color:{{ T.mono2 }}">{{ apiN }}</span></button>
+        <button onClick="{{ toggleEvent }}" aria-pressed="{{ evPressed }}" style="display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border:1px solid {{ evBorder }};border-radius:999px;background:{{ T.surface }};color:{{ T.fg }};font:inherit;cursor:pointer"><span style="width:8px;height:8px;border-radius:50%;background:{{ P.evDot }};display:block"></span>EVENT <span style="color:{{ T.mono2 }}">{{ evN }}</span></button>
+      </div>
+      <sc-if value="{{ hasTraces }}" hint-placeholder-val="{{ true }}">
+        <ol ref="{{ listRef }}" aria-label="数据流记录" style="list-style:none;margin:0;padding:{{ v.gap }}px 14px;overflow:auto;min-height:0;position:relative;display:grid;grid-template-columns:minmax(0,1fr);align-content:start;gap:10px">
+          <sc-for list="{{ traces }}" as="t" hint-placeholder-count="6">
+            <li class="lab-trace" data-kind="{{ t.kind }}" data-failed="{{ t.error }}" title="{{ t.fullSummary }}" style="animation:{{ t.rowAnim }};--trace-color:{{ t.typeColor }}">
+              <time style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;color:{{ T.mono }};line-height:18px">{{ t.time }}</time>
+              <div style="min-width:0">
+                <div class="lab-trace-head">
+                  <span class="lab-trace-kind">{{ t.kindLabel }}</span>
+                  <span class="lab-trace-name" title="{{ t.name }}">{{ t.name }}</span>
+                  <sc-if value="{{ t.eventTag }}" hint-placeholder-val="{{ false }}"><span class="lab-trace-tag">{{ t.eventTag }}</span></sc-if>
+                  <sc-if value="{{ t.dur }}" hint-placeholder-val="{{ false }}"><span style="margin-left:auto;flex:none;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;color:{{ T.mono2 }}">{{ t.dur }}</span></sc-if>
+                </div>
+                <div class="lab-trace-summary"><span class="lab-trace-summary-text">{{ t.summary }}</span><sc-if value="{{ t.error }}"><span class="lab-trace-error"><code>{{ t.errorCode }}</code><span>{{ t.errorMessage }}</span></span></sc-if></div>
+              </div>
+            </li>
+          </sc-for>
+        </ol>
+      </sc-if>
+      <sc-if value="{{ noTraces }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;place-items:center;padding:{{ v.pad }}px;text-align:center;color:{{ T.mono }};font-size:{{ v.fsSm }}px;line-height:1.7"><div><span style="display:block;width:8px;height:8px;margin:0 auto 14px;border-radius:50%;border:1.5px solid {{ T.dashStrong }}"></span>RTM 调用与事件将在这里<br>按时间倒序交错呈现，最新记录在顶部。</div></div>
+      </sc-if>
+      </sc-if>
+    </aside>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;&#x27;light&#x27; | &#x27;dark&#x27;&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;section&quot;:&quot;主题&quot;},&quot;view&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;host&quot;,&quot;tsType&quot;:&quot;&#x27;host&#x27; | &#x27;audience&#x27; | &#x27;entry&#x27; | &#x27;call&#x27; | &#x27;placeholder&#x27; | &#x27;guide&#x27;&quot;,&quot;options&quot;:[&quot;host&quot;,&quot;audience&quot;,&quot;entry&quot;,&quot;call&quot;,&quot;placeholder&quot;,&quot;guide&quot;],&quot;section&quot;:&quot;视角&quot;}}">
+// Accepted implementation reference: comfortable density, mint/sky borders.
+// Every room, nickname and message below is local prototype data; no SDK is loaded.
+class Component extends DCLogic {
+  state = {
+    extra: [], seq: 0, leftOpen: window.innerWidth >= 1024, rightOpen: window.innerWidth >= 1280,
+    viewportWidth: window.innerWidth, themeOverride: null, viewOverride: null,
+    hostRoom: '', audienceRoom: '', hostNickname: '', audienceNickname: '',
+    hostPasteError: '', audiencePasteError: '', hostDisplayName: 'Host', audienceDisplayName: '',
+    roomTitle: '周五晚间语聊', chatDraft: '', chatExtra: [], traceCleared: false,
+    filterKinds: [], showConnection: true, sceneIndex: 1, canResumeHost: false,
+  };
+  seedStartAt = Date.now() - 120000;
+  listRef = React.createRef();
+  chatRef = React.createRef();
+  timers = new Set();
+  lastTraceSignature = '';
+  lastChatSignature = '';
+  onResize = () => {
+    const width = window.innerWidth, prev = this.state.viewportWidth;
+    this.setState({ viewportWidth: width,
+      ...((width >= 1024) !== (prev >= 1024) ? { leftOpen: width >= 1024 } : {}),
+      ...((width >= 1280) !== (prev >= 1280) ? { rightOpen: width >= 1280 } : {}),
+    });
+  };
+  componentDidMount() { window.addEventListener('resize', this.onResize); this.scrollUpdatedContent(); }
+  componentDidUpdate() { this.scrollUpdatedContent(); }
+  componentWillUnmount() { window.removeEventListener('resize', this.onResize); this.timers.forEach(clearTimeout); }
+  scrollUpdatedContent() {
+    // DCLogic receives prevProps only. Track content explicitly, so editing a draft
+    // or changing the theme never yanks a reader back to the bottom of the feed.
+    const view = this.currentView();
+    const traceSignature = [view, this.state.seq, this.state.traceCleared, this.state.filterKinds.join(), this.state.showConnection, this.state.rightOpen].join('|');
+    const chatSignature = `${view}|${this.state.chatExtra.length}`;
+    if (traceSignature !== this.lastTraceSignature && this.listRef.current) this.listRef.current.scrollTop = 0;
+    if (chatSignature !== this.lastChatSignature && this.chatRef.current) this.chatRef.current.scrollTop = this.chatRef.current.scrollHeight;
+    this.lastTraceSignature = traceSignature; this.lastChatSignature = chatSignature;
+  }
+  currentView() {
+    const raw = this.state.viewOverride ?? new URLSearchParams(window.location.search).get('view') ?? this.props.view ?? 'host';
+    const view = ({ listener:'audience', join:'entry', docs:'placeholder', console:'guide' })[raw] || raw;
+    return ['host','audience','entry','call','placeholder','guide'].includes(view) ? view : 'host';
+  }
+  now(at = Date.now()) { const d = new Date(at); const p = (n, l = 2) => String(n).padStart(l, '0'); return `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}.${p(d.getMilliseconds(), 3)}`; }
+  push(rows) { this.setState((s) => ({ extra: [...s.extra, ...rows.map((r, i) => { const at = Date.now(); return { ...r, at, time:this.now(at), id:s.seq + i }; })], seq: s.seq + rows.length })); }
+  emit(kind, name, a, b, delayEvent) {
+    this.push([{ kind, name, a, b }]);
+    if (delayEvent) {
+      const timer = setTimeout(() => { this.timers.delete(timer); this.push([{ kind:'event', name:delayEvent[0], a:delayEvent[1], b:delayEvent[2] }]); }, 420);
+      this.timers.add(timer);
+    }
+  }
+  normalizeNickname(input = '') {
+    const invalid = /[\p{Cc}\p{Cs}\p{Zl}\p{Zp}]/u.test(input) || [...input].some(character => {
+      const cp = character.codePointAt(0);
+      return /\p{Cf}/u.test(character) && cp !== 0x200c && cp !== 0x200d && !(cp >= 0xe0020 && cp <= 0xe007f);
+    });
+    if (invalid) throw new Error('昵称不能包含换行或不可见控制字符');
+    const name = input.normalize('NFC').trim();
+    if (!name) return '';
+    if (!/[\p{L}\p{N}\p{P}\p{S}]/u.test(name)) throw new Error('昵称不能包含换行或不可见控制字符');
+    if ([...name].length > 20) throw new Error('昵称最多 20 个字符');
+    return name;
+  }
+  defaultAudienceName() {
+    const names = ['Alice','Amelia','Ava','Bella','Charlotte','Chloe','Clara','Daisy','Ella','Emily','Emma','Eva','Grace','Hannah','Hazel','Ivy','Jack','James','Leo','Liam','Lucas','Mia','Noah','Nora','Olivia','Oscar','Ruby','Sophia','Theo','William','Zoe'];
+    const hashText = value => { let hash = 2166136261; for (const ch of value) { hash ^= ch.charCodeAt(0); hash = Math.imul(hash, 16777619); } return hash >>> 0; };
+    const uid = 'prototype-audience';
+    return `${names[hashText(uid) % names.length]}_${String(hashText(`${uid}:suffix`) % 1000).padStart(3, '0')}`;
+  }
+  initial(name) {
+    if (!name) return '+';
+    return typeof Intl.Segmenter === 'function' ? new Intl.Segmenter(undefined, { granularity:'grapheme' }).segment(name)[Symbol.iterator]().next().value.segment : [...name][0];
+  }
+  normalizeRoom(input) {
+    if (/[\p{Cc}\p{Cf}]/u.test(input)) throw new Error('房间名称不能包含换行或不可见字符');
+    const name = input.normalize('NFKC').trim().replace(/\s+/gu, ' ');
+    if (!name) throw new Error('请输入房间名称');
+    if ([...name].length > 32) throw new Error('房间名称最多 32 个字符');
+    return name;
+  }
+  inputError(input, normalize) { try { normalize.call(this, input); return ''; } catch (error) { return error.message; } }
+  entryValid(role) {
+    return !this.state[`${role}PasteError`] && !this.inputError(this.state[`${role}Room`], this.normalizeRoom) && !this.inputError(this.state[`${role}Nickname`], this.normalizeNickname);
+  }
+  enterRoom(role) {
+    if (!this.entryValid(role)) return;
+    const nickname = this.normalizeNickname(this.state[`${role}Nickname`]) || (role === 'host' ? 'Host' : this.defaultAudienceName());
+    this.setState({ viewOverride:role, roomTitle:this.normalizeRoom(this.state[`${role}Room`]), [`${role}DisplayName`]:nickname, chatDraft:'', chatExtra:[], extra:[], traceCleared:false, ...(role === 'host' ? { canResumeHost:false } : {}) });
+  }
+  enterKey(event, action) {
+    if (event.key !== 'Enter') return;
+    if (event.isComposing || event.nativeEvent?.isComposing || event.keyCode === 229 || event.nativeEvent?.keyCode === 229) { event.preventDefault(); return; }
+    event.preventDefault(); action();
+  }
+  pasteNickname(event, role) {
+    const input = event.currentTarget;
+    const start = input.selectionStart ?? input.value.length, end = input.selectionEnd ?? start;
+    const candidate = input.value.slice(0, start) + event.clipboardData.getData('text/plain') + input.value.slice(end);
+    try { this.normalizeNickname(candidate); this.setState({ [`${role}PasteError`]:'' }); }
+    catch (error) { event.preventDefault(); this.setState({ [`${role}PasteError`]:error.message }); }
+  }
+  sendChat() {
+    const text = this.state.chatDraft.trim();
+    if (!text || !['host','audience'].includes(this.currentView())) return;
+    const who = this.currentView() === 'host' ? this.state.hostDisplayName : (this.state.audienceDisplayName || this.defaultAudienceName());
+    this.setState(s => ({ chatDraft:'', chatExtra:[...s.chatExtra, { who, text }] }));
+    this.emit('api', 'rtm.publish', '38ms', `chat.message · ${who}：${text}`, ['message','MESSAGE',`chat.message · ${who}：${text}`]);
+  }
+  toggleKind(kind) { this.setState(s => ({ filterKinds:s.filterKinds.includes(kind) ? s.filterKinds.filter(value => value !== kind) : [...s.filterKinds, kind] })); }
+  renderVals() {
+    const view = this.currentView();
+    const dark = (this.state.themeOverride ?? new URLSearchParams(window.location.search).get('theme') ?? this.props.theme ?? 'light') === 'dark';
+    const T = dark
+      ? { canvas:'#0f1012', grid:'#1a1b1e', stageShadow:'0 1px 2px rgba(0,0,0,.4), 0 12px 32px -8px rgba(0,0,0,.6)', scrim:'rgba(0,0,0,.48)', surface:'#141517', subtle:'#1b1c1f', code:'#1b1c1f', avEmpty:'#26272b', lineSubtle:'#1f2024', line:'#2a2b2f', track:'#26272b', dash:'#3a3b40', dashStrong:'#4a4b52', faint:'#5f6368', disabled:'#6b7079', mono2:'#8b8f96', mono:'#a3a7ae', fg2:'#a3a7ae', fg:'#f2f2f3', ink:'#f2f2f3', onInk:'#111214', success:'#3fb27f', danger:'#e5534b' }
+      : { canvas:'#fafafa', grid:'#ececee', stageShadow:'0 1px 2px rgba(17,18,20,.04), 0 12px 32px -8px rgba(17,18,20,.12)', scrim:'rgba(17,18,20,.24)', surface:'#ffffff', subtle:'#fbfbfc', code:'#f6f7f8', avEmpty:'#f3f4f6', lineSubtle:'#f0f1f3', line:'#e6e7ea', track:'#eeeff1', dash:'#dcdee2', dashStrong:'#c4c7cc', faint:'#b3b7bd', disabled:'#a3a7ae', mono2:'#8b8f96', mono:'#6b7079', fg2:'#5f6368', fg:'#111214', ink:'#111214', onInk:'#ffffff', success:'#1f8a5b', danger:'#c8362f' };
+    T.themeSwatch = dark ? 'transparent' : T.fg;
+    const P = { apiDot:dark ? '#7fdcc3' : '#2fa98a', evDot:dark ? '#8ab9e6' : '#3d7fc2' };
+    const c = { accent:T.ink, onAccent:T.onInk, accentText:T.fg };
+    const v = { fs:13, fsSm:12, h1:22, h2:16, pad:24, padX:24, gap:12, rowP:11, btnH:38, hdrH:76, avatar:44, traceP:14, sideW:252, tlW:420, panelW:300 };
+    const isHost = view === 'host', isAudience = view === 'audience', isEntry = view === 'entry', isCall = view === 'call', isPlaceholder = view === 'placeholder', isGuide = view === 'guide', isRoom = isHost || isAudience;
+    const ownNickname = isHost ? this.state.hostDisplayName : (this.state.audienceDisplayName || this.defaultAudienceName());
+    const scenes = ['语聊房','1V1呼叫邀请','电商直播','在线课堂','虚拟世界','游戏互动','文档协同'];
+    const activeIdx = isCall ? 1 : isPlaceholder ? this.state.sceneIndex : 0;
+    const nav = scenes.map((label, i) => ({ label, num:String(i + 1).padStart(2,'0'), color:i === activeIdx ? T.fg : T.fg2, weight:i === activeIdx ? 600 : 500, border:i === activeIdx ? T.ink : 'transparent', numColor:i === activeIdx ? T.mono : T.disabled, open:event => { event.preventDefault(); this.setState({ viewOverride:i === 0 ? 'entry' : i === 1 ? 'call' : 'placeholder', sceneIndex:i }); } }));
+    const states = isRoom ? ['done','done','current','pending','pending'] : isEntry ? ['current','pending','pending','pending','pending'] : [];
+    // INVITE publish success drives caller ringing; no application-level ringing receipt.
+    // Publish failures end immediately; disconnected overlays show the local network error.
+    // Invitation timeout: caller shows no answer; callee shows expired. Redial uses a new callId.
+    // Production scene navigation reloads the document; this prototype only previews views.
+    // Each invitation uses uppercase state tags and returns directly to IDLE; cleanup stays within the ended instance.
+    // Show the caller's 30s countdown only after INVITE publish resolves; no answer timer while sending.
+    const titles = isCall ? ['发起或接收呼叫','响应呼叫邀请','建立真实音频','结束通话'] : ['建立房间连接','看见成员在线','申请与审批上麦','发送房内消息','同步房间状态'];
+    const steps = titles.map((title, i) => ({ title, dot:states[i] === 'done' ? T.success : T.dash, color:T.fg, weight:500, status:states[i] === 'done' ? '已完成' : '待体验', statusColor:states[i] === 'done' ? T.success : T.disabled }));
+    const doneCount = states.filter(s => s === 'done').length;
+    const empty = i => ({ n:String(i + 1).padStart(2,'0'), av:'+', name:'空麦位', sub:'OPEN', borderStyle:'dashed', border:T.dash, bg:'transparent', ring:'none', avBg:T.avEmpty, avColor:T.mono2, nameColor:T.mono, subColor:T.mono2 });
+    const seats = [
+      { n:'01', av:this.initial(this.state.hostDisplayName), name:this.state.hostDisplayName, sub:'SPEAKING', isHost:true, showNum:false, speaking:true, borderStyle:'solid', border:T.line, bg:T.surface, ring:'none', avBg:T.ink, avColor:T.onInk, nameColor:T.fg, subColor:T.fg },
+      { n:'02', av:'鹿', name:'小鹿', sub:'SPEAKING', speaking:true, borderStyle:'solid', border:T.line, bg:T.surface, ring:isHost ? `0 0 0 3px ${T.ink}1a` : 'none', avBg:T.ink, avColor:T.onInk, nameColor:T.fg, subColor:T.fg },
+      ...Array.from({ length:6 }, (_,i) => empty(i + 2)),
+    ];
+    if (isAudience) Object.assign(seats[2], { border:T.ink, borderStyle:'solid', ring:`0 0 0 3px ${T.ink}1a`, sub:'INVITED', subColor:T.fg, nameColor:T.fg });
+    seats.forEach(s => { s.showNum = s.showNum !== false; s.borderW = 1; s.anim = s.speaking ? 'lab-seatbreathe 1.8s ease-in-out infinite' : 'none'; s.ariaLabel = `麦位 ${s.n}：${s.name}`; });
+    const chatSeed = [
+      { who:'系统', text:'小鹿 加入了房间', system:true },
+      { who:'小鹿', text:'大家好，今晚聊什么？' },
+      { who:'系统', text:'小鹿 上了 2 号麦', system:true },
+      { who:'阿明', text:'送出了一个礼物' },
+      { who:this.state.hostDisplayName, text:'欢迎大家，先把公告读一下～' },
+      { who:this.state.audienceDisplayName || this.defaultAudienceName(), text:'来了来了' },
+    ];
+    const chat = [...chatSeed, ...this.state.chatExtra].map(m => ({ ...m, color:m.system ? T.mono2 : T.fg, whoColor:m.system ? T.mono2 : T.fg }));
+    const api = (time,name,dur,summary) => ({ kind:'api', time,name,dur,summary,eventTag:'' });
+    const ev = (time,name,eventTag,summary) => ({ kind:'event', time,name,eventTag,summary,dur:'' });
+    let seed = [];
+    if (isRoom) seed = [
+      api('21:03:58.104','rtm.login','312ms',`userId=prototype-${view} · 登录成功`),
+      ev('21:03:58.416','linkState','CONNECTED','连接状态：CONNECTED'),
+      api('21:04:02.517','rtm.subscribe','186ms','channel=voice-room-demo · withPresence · withMetadata'),
+      ev('21:04:02.731','presence','SNAPSHOT',`在线 1 人：${this.state.hostDisplayName}`),
+      api('21:04:02.902','storage.setChannelMetadata','94ms','初始化 seats / announcement / hostUserId / forcedMutedUserIds'),
+      ev('21:04:41.220','presence','REMOTE_JOIN','小鹿 加入频道'),
+      ev('21:05:03.618','message','USER','seat.request · 小鹿 申请 2 号麦位'),
+      api('21:05:09.045','storage.setChannelMetadata','78ms','seats.seat-1 ← 小鹿'),
+      ev('21:05:09.131','storage','UPDATE','seats 变更 · revision 4'),
+      api('21:05:22.480','rtm.publish','41ms','chat.message · 欢迎大家，先把公告读一下～'),
+    ];
+    if (isAudience) seed = [seed[0], seed[1], seed[2], ev('21:04:41.220','presence','SNAPSHOT',`在线 3 人：${this.state.hostDisplayName} · 小鹿 · 阿明`), ev('21:04:41.300','storage','SNAPSHOT','seats · announcement · hostUserId'), ev('21:05:22.480','message','MESSAGE',`chat.message · ${this.state.hostDisplayName}：欢迎大家，先把公告读一下～`), ev('21:05:40.017','message','USER','seat.invited · 房主邀请你上 3 号麦')];
+    // Keep seeded examples before this session's actions while retaining their
+    // original intervals. Display order follows timestamps, including equal-time seq.
+    seed = seed.map((t, index) => {
+      const at = this.seedStartAt + Date.parse(`1970-01-01T${t.time}Z`) - Date.parse('1970-01-01T21:03:58.104Z');
+      return { ...t, at, seq:index - seed.length, time:this.now(at) };
+    });
+    const live = this.state.extra.map(r => ({ ...(r.kind === 'api' ? api(r.time,r.name,r.a,r.b) : ev(r.time,r.name,r.a,r.b)), at:r.at, seq:r.id, fresh:true, error:r.error }));
+    const allTraces = [...(this.state.traceCleared ? [] : seed), ...live];
+    const apiN = allTraces.filter(t => t.kind === 'api').length, evN = allTraces.length - apiN;
+    const traces = allTraces.filter(t => (this.state.filterKinds.length === 0 || this.state.filterKinds.includes(t.kind)) && (this.state.showConnection || t.name !== 'linkState')).sort((a,b) => b.at - a.at || b.seq - a.seq).map(t => ({ ...t, kindLabel:t.kind === 'api' ? 'API' : 'EVENT', typeColor:t.kind === 'api' ? P.apiDot : P.evDot, rowAnim:'lab-rowin .35s ease-out, lab-rowbreathe 1.8s ease-in-out .3s 2', fullSummary:[t.summary, t.error ? `${t.error.code} ${t.error.message}` : ''].filter(Boolean).join('\n'), error:!!t.error, errorCode:t.error?.code ?? '', errorMessage:t.error?.message ?? '' }));
+    const makeEntry = role => {
+      const room = this.state[`${role}Room`], nickname = this.state[`${role}Nickname`];
+      const roomError = room ? this.inputError(room, this.normalizeRoom) : '';
+      const nicknameError = this.state[`${role}PasteError`] || this.inputError(nickname, this.normalizeNickname);
+      return { room,nickname, roomInvalid:!!roomError, nicknameInvalid:!!nicknameError, roomHint:roomError || (role === 'host' ? '名称唯一，最多 32 个字符；英文不区分大小写。' : '换一台设备，输入相同名称即可加入。'), nicknameHint:nicknameError || (role === 'host' ? '不填使用 Host；最多 20 个字符' : '不填自动分配昵称；最多 20 个字符'), roomHintColor:roomError ? T.danger : T.mono, nicknameHintColor:nicknameError ? T.danger : T.mono, disabled:!this.entryValid(role), editRoom:event => this.setState({ [`${role}Room`]:event.target.value }), editNickname:event => this.setState({ [`${role}Nickname`]:event.target.value, [`${role}PasteError`]:'' }), paste:event => this.pasteNickname(event,role), enter:event => this.enterKey(event,() => this.enterRoom(role)), submit:() => this.enterRoom(role) };
+    };
+    const { leftOpen,rightOpen } = this.state;
+    return {
+      currentView:view, themeName:dark ? 'dark' : 'light', leftOpen,leftClosed:!leftOpen,rightOpen,rightClosed:!rightOpen,
+      themeLabel:dark ? 'DARK' : 'LIGHT', themeTitle:dark ? '切换到浅色主题' : '切换到深色主题', toggleTheme:() => this.setState({ themeOverride:dark ? 'light' : 'dark' }),
+      leftW:leftOpen ? v.sideW : 48, rightW:rightOpen ? v.tlW : 48, leftPadX:leftOpen ? v.padX : 10, leftIconFlip:leftOpen ? 'none' : 'scaleX(-1)', leftTitle:leftOpen ? '折叠体验路径' : '展开体验路径',
+      toggleLeft:() => this.setState(s => ({ leftOpen:!s.leftOpen, ...(s.viewportWidth <= 760 ? { rightOpen:false } : {}) })), toggleRight:() => this.setState(s => ({ rightOpen:!s.rightOpen, ...(s.viewportWidth <= 760 ? { leftOpen:false } : {}) })),
+      T,P,c,v,nav,steps,doneCount,hasSteps:!isPlaceholder,progressPct:doneCount / steps.length * 100,progressLabel:isPlaceholder ? '待开放' : `${doneCount}/${steps.length}`,
+      isHost,isAudience,isEntry,isCall,isPlaceholder,isGuide,isRoom, ownNickname, roomTitle:this.state.roomTitle,
+      roleTag:isHost ? 'HOST' : 'AUDIENCE',panelW:v.panelW,seatHint:isHost ? '选择麦位以管理嘉宾' : '选择空麦位申请上麦',
+      connDot:isGuide ? T.danger : isEntry ? T.disabled : T.success,connLabel:isGuide ? 'NO APP ID' : isEntry ? 'IDLE' : 'CONNECTED',
+      listRef:this.listRef,chatRef:this.chatRef, host:makeEntry('host'),audience:makeEntry('audience'),canResumeHost:this.state.canResumeHost,
+      leaveRoom:() => this.setState({ viewOverride:'entry', ...(isHost ? { canResumeHost:true } : {}) }), dissolveRoom:() => this.setState({ viewOverride:'entry', canResumeHost:false }), resumeHost:() => this.setState({ viewOverride:'host', canResumeHost:false }), chatDraft:this.state.chatDraft,sendDisabled:!this.state.chatDraft.trim(), editChat:event => this.setState({ chatDraft:event.target.value }), submitChat:event => { event.preventDefault(); this.sendChat(); }, chatKeyDown:event => this.enterKey(event,() => this.sendChat()),
+      actGift:() => this.emit('api','rtm.publish','31ms',`MESSAGE gift.sent · ${ownNickname} 送出礼物`,['message','MESSAGE','gift.sent · 收到礼物事件']),
+      actLike:() => this.emit('api','rtm.publish','31ms',`MESSAGE emoji.reaction · ${ownNickname} 点赞`,['message','MESSAGE','emoji.reaction · 收到点赞事件']),
+      actSelfMute:() => this.emit('api','presence.setState','52ms','muted=true',['presence','REMOTE_STATE_CHANGED','muted=true']),
+      actApply:() => this.emit('api','rtm.publish','31ms','seat.request → host · 申请 3 号麦位',['message','USER',`seat.request · ${ownNickname} 申请 3 号麦位`]),
+      actApprove:() => this.emit('api','storage.setChannelMetadata','74ms','seats.seat-2 ← 阿明',['storage','UPDATE','seats 变更 · revision 5']),
+      actMute:() => this.emit('api','storage.setChannelMetadata','52ms','forcedMutedUserIds += 小鹿',['storage','UPDATE','forcedMutedUserIds 变更 · revision 6']),
+      actAnnounce:() => this.emit('api','storage.setChannelMetadata','61ms','announcement ← 新公告',['storage','UPDATE','announcement 变更 · revision 7']),
+      seats,chat,chatCount:chat.length,apiN,evN,traces,hasTraces:traces.length > 0,noTraces:traces.length === 0,traceCount:allTraces.length,
+      clearTraces:() => this.setState({ extra:[],traceCleared:true }), toggleConnection:() => this.setState(s => ({ showConnection:!s.showConnection })), connectionAction:this.state.showConnection ? '隐藏连接' : '显示连接',
+      toggleApi:() => this.toggleKind('api'),toggleEvent:() => this.toggleKind('event'),apiPressed:this.state.filterKinds.includes('api'),evPressed:this.state.filterKinds.includes('event'),apiBorder:this.state.filterKinds.includes('api') ? T.ink : T.line,evBorder:this.state.filterKinds.includes('event') ? T.ink : T.line,
+      onlineAudience:['小鹿','阿明',this.state.audienceDisplayName || this.defaultAudienceName()],
+      sceneNum:String(activeIdx + 1).padStart(2,'0'),sceneName:scenes[activeIdx],sceneDesc:'通过呼叫邀请、接听、拒绝与挂断，体验双方通话状态的协同。',
+      caps:[{ name:'用户消息',api:'publish · MESSAGE' },{ name:'在线状态',api:'presence · setState' }],
+    };
+  }
+}
+</script>
+</body>
+</html>

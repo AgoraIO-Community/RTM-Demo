@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<style>
+body{margin:0;background:#ececee;color:#111214;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#111214}a:hover{color:#5f6368}
+</style>
+</helmet>
+<section style="display:grid;gap:40px;padding:48px">
+  <div style="display:flex;align-items:baseline;gap:16px;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:12px;color:#5f6368"><span style="font-size:20px;font-weight:700;color:#111214;font-family:-apple-system,'PingFang SC',sans-serif">墨 · 当前视图对照</span>v1.2 + 2026-09-08 增量 · 浅色 / 深色 × 五个视角 · 1440×900 · 规范见 <a href="Design System.dc.html">Design System</a> · <a href="Lab.dc.html">主原型</a> · <a href="README.md">交接说明</a></div>
+  <div style="display:grid;gap:16px">
+    <div style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.1em;color:#6b7079">LIGHT</div>
+    <div style="display:flex;gap:48px;align-items:flex-start;flex-wrap:wrap">
+    <div id="4a" style="display:grid;gap:12px">
+      <div style="display:flex;align-items:center;gap:12px;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:12px;color:#5f6368"><span style="padding:3px 9px;border-radius:4px;background:#fff;color:#111214;border:1px solid #111214;font-weight:700">4a</span><strong style="color:#111214;font-family:-apple-system,'PingFang SC',sans-serif">房主视角</strong>麦位与房主管理面板 · 操作演示使用模拟数据流</div>
+      <div style="border:1px solid #d8d9dd;border-radius:10px;overflow:hidden;box-shadow:0 20px 60px rgb(0 0 0 / 8%)"><iframe title="房主 · light" src="Lab.dc.html?view=host&amp;theme=light" width="1440" height="900" style="display:block;border:0;width:1440px;height:900px"></iframe></div>
+    </div>
+    <div id="4b" style="display:grid;gap:12px">
+      <div style="display:flex;align-items:center;gap:12px;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:12px;color:#5f6368"><span style="padding:3px 9px;border-radius:4px;background:#fff;color:#111214;border:1px solid #111214;font-weight:700">4b</span><strong style="color:#111214;font-family:-apple-system,'PingFang SC',sans-serif">听众视角</strong>收到上麦邀请 · 我的状态</div>
+      <div style="border:1px solid #d8d9dd;border-radius:10px;overflow:hidden;box-shadow:0 20px 60px rgb(0 0 0 / 8%)"><iframe title="听众 · light" src="Lab.dc.html?view=audience&amp;theme=light" width="1440" height="900" style="display:block;border:0;width:1440px;height:900px"></iframe></div>
+    </div>
+    <div id="4c" style="display:grid;gap:12px">
+      <div style="display:flex;align-items:center;gap:12px;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:12px;color:#5f6368"><span style="padding:3px 9px;border-radius:4px;background:#fff;color:#111214;border:1px solid #111214;font-weight:700">4c</span><strong style="color:#111214;font-family:-apple-system,'PingFang SC',sans-serif">入口</strong>创建 / 加入 · 昵称可选填</div>
+      <div style="border:1px solid #d8d9dd;border-radius:10px;overflow:hidden;box-shadow:0 20px 60px rgb(0 0 0 / 8%)"><iframe title="创建与加入 · light" src="Lab.dc.html?view=entry&amp;theme=light" width="1440" height="900" style="display:block;border:0;width:1440px;height:900px"></iframe></div>
+    </div>
+    <div id="4d" style="display:grid;gap:12px">
+      <div style="display:flex;align-items:center;gap:12px;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:12px;color:#5f6368"><span style="padding:3px 9px;border-radius:4px;background:#fff;color:#111214;border:1px solid #111214;font-weight:700">4d</span><strong style="color:#111214;font-family:-apple-system,'PingFang SC',sans-serif">路线图占位</strong>1V1 呼叫邀请 · 计划能力列表</div>
+      <div style="border:1px solid #d8d9dd;border-radius:10px;overflow:hidden;box-shadow:0 20px 60px rgb(0 0 0 / 8%)"><iframe title="场景占位 · light" src="Lab.dc.html?view=placeholder&amp;theme=light" width="1440" height="900" style="display:block;border:0;width:1440px;height:900px"></iframe></div>
+    </div>
+    <div id="4e" style="display:grid;gap:12px">
+      <div style="display:flex;align-items:center;gap:12px;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:12px;color:#5f6368"><span style="padding:3px 9px;border-radius:4px;background:#fff;color:#111214;border:1px solid #111214;font-weight:700">4e</span><strong style="color:#111214;font-family:-apple-system,'PingFang SC',sans-serif">App ID 引导</strong>NO APP ID · 时间线空态</div>
+      <div style="border:1px solid #d8d9dd;border-radius:10px;overflow:hidden;box-shadow:0 20px 60px rgb(0 0 0 / 8%)"><iframe title="配置引导 · light" src="Lab.dc.html?view=guide&amp;theme=light" width="1440" height="900" style="display:block;border:0;width:1440px;height:900px"></iframe></div>
+    </div>
+    </div>
+  </div>
+  <div style="display:grid;gap:16px">
+    <div style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.1em;color:#6b7079">DARK</div>
+    <div style="display:flex;gap:48px;align-items:flex-start;flex-wrap:wrap">
+    <div id="4f" style="display:grid;gap:12px">
+      <div style="display:flex;align-items:center;gap:12px;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:12px;color:#5f6368"><span style="padding:3px 9px;border-radius:4px;background:#111214;color:#fff;border:1px solid #111214;font-weight:700">4f</span><strong style="color:#111214;font-family:-apple-system,'PingFang SC',sans-serif">房主视角</strong>麦位与房主管理面板 · 操作演示使用模拟数据流</div>
+      <div style="border:1px solid #d8d9dd;border-radius:10px;overflow:hidden;box-shadow:0 20px 60px rgb(0 0 0 / 8%)"><iframe title="房主 · dark" src="Lab.dc.html?view=host&amp;theme=dark" width="1440" height="900" style="display:block;border:0;width:1440px;height:900px"></iframe></div>
+    </div>
+    <div id="4g" style="display:grid;gap:12px">
+      <div style="display:flex;align-items:center;gap:12px;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:12px;color:#5f6368"><span style="padding:3px 9px;border-radius:4px;background:#111214;color:#fff;border:1px solid #111214;font-weight:700">4g</span><strong style="color:#111214;font-family:-apple-system,'PingFang SC',sans-serif">听众视角</strong>收到上麦邀请 · 我的状态</div>
+      <div style="border:1px solid #d8d9dd;border-radius:10px;overflow:hidden;box-shadow:0 20px 60px rgb(0 0 0 / 8%)"><iframe title="听众 · dark" src="Lab.dc.html?view=audience&amp;theme=dark" width="1440" height="900" style="display:block;border:0;width:1440px;height:900px"></iframe></div>
+    </div>
+    <div id="4h" style="display:grid;gap:12px">
+      <div style="display:flex;align-items:center;gap:12px;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:12px;color:#5f6368"><span style="padding:3px 9px;border-radius:4px;background:#111214;color:#fff;border:1px solid #111214;font-weight:700">4h</span><strong style="color:#111214;font-family:-apple-system,'PingFang SC',sans-serif">入口</strong>创建 / 加入 · 昵称可选填</div>
+      <div style="border:1px solid #d8d9dd;border-radius:10px;overflow:hidden;box-shadow:0 20px 60px rgb(0 0 0 / 8%)"><iframe title="创建与加入 · dark" src="Lab.dc.html?view=entry&amp;theme=dark" width="1440" height="900" style="display:block;border:0;width:1440px;height:900px"></iframe></div>
+    </div>
+    <div id="4i" style="display:grid;gap:12px">
+      <div style="display:flex;align-items:center;gap:12px;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:12px;color:#5f6368"><span style="padding:3px 9px;border-radius:4px;background:#111214;color:#fff;border:1px solid #111214;font-weight:700">4i</span><strong style="color:#111214;font-family:-apple-system,'PingFang SC',sans-serif">路线图占位</strong>1V1 呼叫邀请 · 计划能力列表</div>
+      <div style="border:1px solid #d8d9dd;border-radius:10px;overflow:hidden;box-shadow:0 20px 60px rgb(0 0 0 / 8%)"><iframe title="场景占位 · dark" src="Lab.dc.html?view=placeholder&amp;theme=dark" width="1440" height="900" style="display:block;border:0;width:1440px;height:900px"></iframe></div>
+    </div>
+    <div id="4j" style="display:grid;gap:12px">
+      <div style="display:flex;align-items:center;gap:12px;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:12px;color:#5f6368"><span style="padding:3px 9px;border-radius:4px;background:#111214;color:#fff;border:1px solid #111214;font-weight:700">4j</span><strong style="color:#111214;font-family:-apple-system,'PingFang SC',sans-serif">App ID 引导</strong>NO APP ID · 时间线空态</div>
+      <div style="border:1px solid #d8d9dd;border-radius:10px;overflow:hidden;box-shadow:0 20px 60px rgb(0 0 0 / 8%)"><iframe title="配置引导 · dark" src="Lab.dc.html?view=guide&amp;theme=dark" width="1440" height="900" style="display:block;border:0;width:1440px;height:900px"></iframe></div>
+    </div>
+    </div>
+  </div>
+</section>
+</x-dc>
+</body>
+</html>
