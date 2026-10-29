@@ -11,6 +11,8 @@ function grant(overrides: Record<string, unknown> = {}) {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.unstubAllEnvs();
+  window.history.replaceState(null, '', '/');
 });
 
 describe('getAgoraToken', () => {
@@ -28,6 +30,17 @@ describe('getAgoraToken', () => {
     expect(fetch).toHaveBeenCalledWith('/api/token', expect.objectContaining({
       method: 'POST', credentials: 'same-origin', mode: 'same-origin', cache: 'no-store',
       headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(request),
+    }));
+  });
+
+  it('官网子路径下的 Token 请求也带上公共前缀', async () => {
+    vi.stubEnv('BASE_URL', '/rtm-demo/');
+    window.history.replaceState(null, '', '/rtm-demo/social/voice-room');
+    const fetch = vi.fn(async () => new Response(JSON.stringify(grant())));
+    vi.stubGlobal('fetch', fetch);
+    await expect(getAgoraToken(request, auth)).resolves.toBe('short-lived-token');
+    expect(fetch).toHaveBeenCalledWith('/rtm-demo/api/token', expect.objectContaining({
+      credentials: 'same-origin', mode: 'same-origin',
     }));
   });
 

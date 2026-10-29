@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   createVoiceRoomInviteCode,
   createVoiceRoomUrl,
@@ -10,6 +10,11 @@ import {
 } from '../voice-room-url';
 
 const nameKey = `vrn-v1-${'a'.repeat(43)}`;
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+  window.history.replaceState(null, '', '/');
+});
 
 function payload(overrides: Partial<VoiceRoomUrlPayload> = {}): VoiceRoomUrlPayload {
   return {
@@ -31,6 +36,14 @@ function encodeRaw(value: unknown): string {
 }
 
 describe('语聊房 URL payload', () => {
+  it('官网前缀下的身份 URL 保留路径，旧格式 payload 仍能解析', () => {
+    vi.stubEnv('BASE_URL', '/rtm-demo/');
+    window.history.replaceState(null, '', '/rtm-demo/social/voice-room');
+    const url = createVoiceRoomUrl('https://www.shengwang.cn', payload());
+    expect(new URL(url).pathname).toBe('/rtm-demo/social/voice-room');
+    expect(parseVoiceRoomUrl(url)).toEqual(payload());
+    expect([...new URL(url).searchParams.keys()]).toEqual(['data']);
+  });
   it('拒绝不受支持的非 V2 payload', () => {
     expect(decodeVoiceRoomUrlPayload(encodeRaw({
       directorySnapshot: { roomId: 'voice-room-old' },

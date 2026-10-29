@@ -7,6 +7,7 @@ import { createRtcHelper, type RtcHelper } from "../../shared/rtc";
 import { getAgoraToken, type TokenProvider } from "../../shared/utils/token";
 import type { TraceSource } from "../../shared/timeline/useMergedTraces";
 import type { ExperienceProgress } from "../../shared/experience/types";
+import { appPath } from "../../shared/paths";
 import { useVoiceRoomExperienceProgress } from "./experienceProgress";
 import { SEAT_COUNT } from "./config";
 import { AppRtmSession, type AppRtmLinkState } from "./app-rtm";
@@ -902,7 +903,7 @@ export function VoiceRoomScene({
             const endedReason = client.getView().endedReason;
             if (endedReason) {
               setResumeHostPayload(undefined);
-              window.history.replaceState(null, '', '/social/voice-room');
+              window.history.replaceState(null, '', appPath('/social/voice-room'));
             } else if (entryView.payload?.role === 'host') {
               setResumeHostPayload(entryView.payload);
             }
@@ -925,7 +926,7 @@ export function VoiceRoomScene({
             }
             setResumeHostPayload(undefined);
             // Keep the page session and accumulated traces; discard the ended-room URL.
-            window.history.replaceState(null, '', '/social/voice-room');
+            window.history.replaceState(null, '', appPath('/social/voice-room'));
             await controller.leaveRoom();
           }}
         />
@@ -1032,7 +1033,7 @@ export function VoiceRoomScene({
               房间名称
               <input className="ink-input" aria-label="加入的房间名称" aria-describedby="join-name-hint" aria-invalid={!!joinError} disabled={pending} value={joinName} onChange={event => setJoinName(event.target.value)} onKeyDown={event => submitOnEnter(event, joinByName)} placeholder="输入房主告诉你的房间名称" />
             </label>
-            <p id="join-name-hint" className={`vr-entry__hint ${joinError ? 'vr-entry__hint--error' : ''}`}>{joinError ?? <>同机体验？<a className="ink-inline-link" href="/social/voice-room" target="_blank" rel="noopener noreferrer">新开听众页<ArrowUpRight size={13} aria-hidden="true" /></a></>}</p>
+            <p id="join-name-hint" className={`vr-entry__hint ${joinError ? 'vr-entry__hint--error' : ''}`}>{joinError ?? <>同机体验？<a className="ink-inline-link" href={appPath('/social/voice-room')} target="_blank" rel="noopener noreferrer">新开听众页<ArrowUpRight size={13} aria-hidden="true" /></a></>}</p>
             <label>
               你的昵称（选填）
               <input className="ink-input" aria-label="观众昵称" aria-describedby="audience-nickname-hint" aria-invalid={!!audienceNicknameError} disabled={pending} value={audienceNickname} onChange={event => { setAudienceNickname(event.target.value); setAudienceNicknamePasteError(undefined); }} onPaste={event => pasteNickname(event, setAudienceNicknamePasteError)} onKeyDown={event => submitOnEnter(event, joinByName)} placeholder="例如：小雨" />

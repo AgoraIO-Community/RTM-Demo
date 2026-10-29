@@ -7,6 +7,8 @@ import { EnvGuide } from './EnvGuide';
 import { experienceForPath, experienceScenarios } from './experienceScenarios';
 import { ExperiencePath } from '../shared/experience/ExperiencePath';
 import type { ExperienceProgress } from '../shared/experience/types';
+import type { AnalyticsTracker } from '../shared/analytics/tracker';
+import { appPath, getAppBasePath } from '../shared/paths';
 import { ScenePlaceholder } from './ScenePlaceholder';
 import type { ResolvedEnv } from './env';
 import { SceneContextProvider, useSceneContext, type OneToOneCallOverrides, type VoiceRoomOverrides } from './sceneContext';
@@ -41,7 +43,9 @@ function useMediaFlip(query: string, onFlip: (matches: boolean) => void): void {
 }
 
 /** One public entry per scenario; preserve existing URLs for invitation compatibility. */
-function PrimaryTabs({ activePath }: { activePath: string }) {
+function PrimaryTabs({ activePath }: {
+  activePath: string;
+}) {
   const { search, hash } = useLocation();
   const [plannedHint, setPlannedHint] = useState<{ id: string; x: number; y: number }>();
   const showPlannedHint = (element: HTMLElement, id: string) => {
@@ -50,7 +54,7 @@ function PrimaryTabs({ activePath }: { activePath: string }) {
   };
   const preserveCurrentUrl = (element: HTMLAnchorElement, path: string) => {
     // Room admission updates history directly, so the router snapshot can lag behind.
-    if (path === activePath && window.location.pathname === path) element.href = window.location.href;
+    if (path === activePath && window.location.pathname === appPath(path)) element.href = window.location.href;
   };
   return (
     <>
@@ -69,7 +73,9 @@ function PrimaryTabs({ activePath }: { activePath: string }) {
       ) : (
         <Link key={scenario.id} to={scenario.path === activePath ? `${scenario.path}${search}${hash}` : scenario.path}
           reloadDocument className="lab-tab lab-tab--primary"
-          onClick={event => preserveCurrentUrl(event.currentTarget, scenario.path)}
+          onClick={event => {
+            preserveCurrentUrl(event.currentTarget, scenario.path);
+          }}
           onContextMenu={event => preserveCurrentUrl(event.currentTarget, scenario.path)}
           data-active={scenario.path === activePath} aria-current={scenario.path === activePath ? 'page' : undefined}>
           <span className="lab-tab__num" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
@@ -199,6 +205,7 @@ function SceneRoute() {
 
 interface LabShellProps {
   env: ResolvedEnv;
+  analytics?: AnalyticsTracker;
   voiceRoomOverrides?: VoiceRoomOverrides;
   oneToOneCallOverrides?: OneToOneCallOverrides;
 }
@@ -208,7 +215,7 @@ interface LabShellProps {
  *
  * 左右栏的折叠态都由外壳持有：折叠会改变 `.lab-workspace` 的栅格列宽，那是外壳的样式。
  */
-function LabShell({ env, voiceRoomOverrides, oneToOneCallOverrides }: LabShellProps) {
+function LabShell({ env, analytics, voiceRoomOverrides, oneToOneCallOverrides }: LabShellProps) {
   const { categoryId = '', sceneId = '' } = useParams();
   const experience = experienceForPath(`/${categoryId}/${sceneId}`);
   const [theme, toggleTheme] = useTheme();
@@ -218,6 +225,12 @@ function LabShell({ env, voiceRoomOverrides, oneToOneCallOverrides }: LabShellPr
   const [connection, setConnection] = useState<AppRtmLinkState>();
   // Trace sources belong to the current document and reset on scene navigation.
   const [traceSources, setTraceSources] = useState<readonly TraceSource[]>(NO_TRACE_SOURCES);
+
+  useEffect(() => {
+    if (!experience) return;
+    analytics?.enterScene(experience);
+    analytics?.updateProgress(experience, experienceProgress);
+  }, [analytics, experience, experienceProgress]);
 
   useMediaFlip(RIGHT_RAIL_QUERY, useCallback((matches: boolean) => setRightOpen(!matches), []));
   useMediaFlip(LEFT_RAIL_QUERY, useCallback((matches: boolean) => setLeftOpen(!matches), []));
@@ -263,6 +276,8 @@ function LabShell({ env, voiceRoomOverrides, oneToOneCallOverrides }: LabShellPr
           progress={experienceProgress}
           collapsed={!leftOpen}
           onToggle={() => setLeftOpen((current) => !current)}
+          onConsoleClick={() => { if (experience) analytics?.consoleClick(experience, experienceProgress); }}
+          onDocClick={linkType => { if (experience) analytics?.docClick(experience, linkType); }}
         />
         <main className="lab-body" data-timeline={rightOpen ? 'expanded' : 'collapsed'}>
           <SceneContextProvider value={sceneContext}>
@@ -281,6 +296,7 @@ function LabShell({ env, voiceRoomOverrides, oneToOneCallOverrides }: LabShellPr
 
 export interface LabRoutesProps {
   env: ResolvedEnv;
+  analytics?: AnalyticsTracker;
   /**
    * 外壳的依赖注入点，只有测试会传。
    *
@@ -291,29 +307,35 @@ export interface LabRoutesProps {
   oneToOneCallOverrides?: OneToOneCallOverrides;
 }
 
+/** Preserve entry attribution and existing URL payloads across default redirects. */
+function DefaultSceneRedirect() {
+  const { search, hash } = useLocation();
+  return <Navigate to={`${DEFAULT_PATH}${search}${hash}`} replace />;
+}
+
 /**
  * 路由表。不自带 router —— 由调用方提供 router 上下文，测试因此可以用
  * `MemoryRouter` 指定起始路径，生产代码用 `BrowserRouter`。
  */
-export function LabRoutes({ env, voiceRoomOverrides, oneToOneCallOverrides }: LabRoutesProps) {
+export function LabRoutes({ env, analytics, voiceRoomOverrides, oneToOneCallOverrides }: LabRoutesProps) {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to={DEFAULT_PATH} replace />} />
+      <Route path="/" element={<DefaultSceneRedirect />} />
       <Route
         path="/:categoryId/:sceneId"
-        element={<LabShell env={env} voiceRoomOverrides={voiceRoomOverrides} oneToOneCallOverrides={oneToOneCallOverrides} />}
+        element={<LabShell env={env} analytics={analytics} voiceRoomOverrides={voiceRoomOverrides} oneToOneCallOverrides={oneToOneCallOverrides} />}
       >
         <Route index element={<SceneRoute />} />
       </Route>
-      <Route path="*" element={<Navigate to={DEFAULT_PATH} replace />} />
+      <Route path="*" element={<DefaultSceneRedirect />} />
     </Routes>
   );
 }
 
-export function App({ env }: LabRoutesProps) {
+export function App({ env, analytics }: LabRoutesProps) {
   return (
-    <BrowserRouter>
-      <LabRoutes env={env} />
+    <BrowserRouter basename={getAppBasePath()}>
+      <LabRoutes env={env} analytics={analytics} />
     </BrowserRouter>
   );
 }

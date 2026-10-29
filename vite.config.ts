@@ -2,8 +2,13 @@ import react from '@vitejs/plugin-react';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { defineConfig } from 'vitest/config';
+import { loadEnv } from 'vite';
+import { normalizeBasePath } from './src/shared/basePath';
 
 export default defineConfig(({ mode }) => {
+  const base = normalizeBasePath(process.env.VITE_BASE_PATH
+    ?? (mode === 'e2e' ? '/' : loadEnv(mode, process.cwd(), 'VITE_BASE_PATH').VITE_BASE_PATH)
+    ?? '/');
   const https = mode === 'https'
     ? {
         key: readFileSync(resolve('.cert/dev-key.pem')),
@@ -12,6 +17,7 @@ export default defineConfig(({ mode }) => {
     : undefined;
 
   return {
+    base,
     plugins: [react()],
     server: https ? { https } : undefined,
   resolve: mode === 'e2e' ? {

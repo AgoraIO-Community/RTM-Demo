@@ -11,9 +11,31 @@ import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import { readEnvSnapshot } from './envSnapshot';
 import { applyTheme, resolveInitialTheme } from './theme';
+import { resolveAnalyticsConfig, startAnalytics } from '../shared/analytics/posthog';
+import { bindAnalyticsToPage } from '../shared/analytics/browser';
+import { experienceForPath } from './experienceScenarios';
+import { getAppBasePath } from '../shared/paths';
 import './styles.css';
 
 applyTheme(resolveInitialTheme());
+
+// Read analytics settings once, before redirects can consume entry parameters.
+const analytics = startAnalytics(resolveAnalyticsConfig({
+  injected: window.__ENV__?.analytics,
+  hostname: window.location.hostname,
+  buildTime: {
+    VITE_POSTHOG_ENABLED: import.meta.env.VITE_POSTHOG_ENABLED as string | undefined,
+    VITE_POSTHOG_PROJECT_TOKEN: import.meta.env.VITE_POSTHOG_PROJECT_TOKEN as string | undefined,
+    VITE_POSTHOG_HOST: import.meta.env.VITE_POSTHOG_HOST as string | undefined,
+    VITE_ANALYTICS_SITE: import.meta.env.VITE_ANALYTICS_SITE as string | undefined,
+    VITE_ANALYTICS_ENVIRONMENT: import.meta.env.VITE_ANALYTICS_ENVIRONMENT as string | undefined,
+    PROD: import.meta.env.PROD,
+  },
+}));
+bindAnalyticsToPage(analytics, pathname => {
+  const base = getAppBasePath(pathname);
+  return experienceForPath(`/${pathname.slice(base.length)}`);
+});
 
 // History may restore an old document with a disposed session from the back/forward cache.
 window.addEventListener('pageshow', (event) => {
@@ -22,6 +44,6 @@ window.addEventListener('pageshow', (event) => {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App env={readEnvSnapshot()} />
+    <App env={readEnvSnapshot()} analytics={analytics} />
   </StrictMode>,
 );

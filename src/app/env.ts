@@ -11,9 +11,11 @@
  */
 
 import type { TokenAuthConfig } from '../shared/utils/token';
+import type { AnalyticsSettings } from '../shared/analytics/posthog';
 
 export interface LabEnv {
   appId?: string;
+  analytics?: AnalyticsSettings;
 }
 
 /** 构建期注入的本地兜底配置（Vite 的 import.meta.env 子集）。 */

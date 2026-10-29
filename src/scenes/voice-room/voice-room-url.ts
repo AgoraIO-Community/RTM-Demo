@@ -1,5 +1,6 @@
 import { isNameKey } from './room-name';
 import { isValidNickname } from './nickname';
+import { appPath } from '../../shared/paths';
 
 export interface VoiceRoomUrlPayload {
   version: 2;
@@ -86,7 +87,7 @@ export function createVoiceRoomInviteCode(payload: VoiceRoomUrlPayload): string 
 }
 
 export function createVoiceRoomUrl(origin: string, payload: VoiceRoomUrlPayload): string {
-  return `${origin.replace(/\/$/u, '')}/social/voice-room?data=${encodeVoiceRoomUrlPayload(payload)}`;
+  return `${origin.replace(/\/$/u, '')}${appPath('/social/voice-room')}?data=${encodeVoiceRoomUrlPayload(payload)}`;
 }
 
 export function withVoiceRoomPageIdentity(payload: VoiceRoomUrlPayload, pageUid: string, nickname: string): VoiceRoomUrlPayload {

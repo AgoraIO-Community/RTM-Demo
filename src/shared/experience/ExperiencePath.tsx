@@ -2,11 +2,13 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import type { ExperienceProgress, ExperienceScenario, ExperienceStep } from './types';
+import { completedExperienceSteps } from './progress';
+import type { LinkType } from '../analytics/tracker';
 
 const resources = [
-  { label: '产品简介', href: 'https://doc.shengwang.cn/doc/rtm2/javascript/landing-page' },
-  { label: '最佳实践', href: 'https://doc.shengwang.cn/doc/rtm2/javascript/user-guide/link/link-basic' },
-  { label: 'API参考', href: 'https://doc.shengwang.cn/api-ref/rtm2/javascript/toc-configuration/configuration' },
+  { label: '产品简介', type: 'overview', href: 'https://doc.shengwang.cn/doc/rtm2/javascript/landing-page' },
+  { label: '最佳实践', type: 'practice', href: 'https://doc.shengwang.cn/doc/rtm2/javascript/user-guide/link/link-basic' },
+  { label: 'API参考', type: 'api', href: 'https://doc.shengwang.cn/api-ref/rtm2/javascript/toc-configuration/configuration' },
 ] as const;
 
 /** 面板折叠图标（24 网格、1.75 描边）。折叠态由外层通过 `data-flipped` 水平镜像。 */
@@ -74,20 +76,21 @@ function StepHelp({ step, children }: { step: ExperienceStep; children: React.Re
  * 任务只有「已完成 / 待体验」两种状态（设计决定，不做进行中或错误态）。
  * 折叠态由外壳持有：它要改工作区栅格的列宽。
  */
-export function ExperiencePath({ scenario, progress, collapsed, onToggle }: {
+export function ExperiencePath({ scenario, progress, collapsed, onToggle, onConsoleClick, onDocClick }: {
   scenario?: ExperienceScenario;
   progress?: ExperienceProgress;
   collapsed: boolean;
   onToggle: () => void;
+  onConsoleClick?: () => void;
+  onDocClick?: (linkType: LinkType) => void;
 }) {
   const sourceDirectory = scenario?.id === 'voice-room' || scenario?.id === 'one-to-one-call'
     ? `/tree/master/src/scenes/${scenario.id}` : '';
   const sceneResources = [...resources, {
-    label: 'Demo 源码', href: `https://github.com/AgoraIO-Community/RTM-Demo${sourceDirectory}`,
+    label: 'Demo 源码', type: 'source' as const, href: `https://github.com/AgoraIO-Community/RTM-Demo${sourceDirectory}`,
   }];
   const steps = scenario?.steps ?? [];
-  const evidence = new Set(progress?.scenarioId === scenario?.id ? progress?.milestones : []);
-  const completed = steps.filter((step) => step.milestones.length > 0 && step.milestones.every((item) => evidence.has(item.id)));
+  const completed = completedExperienceSteps(scenario, progress);
   const ready = scenario?.status === 'ready';
   const progressLabel = ready ? `${completed.length}/${steps.length}` : '待开放';
 
@@ -146,14 +149,16 @@ export function ExperiencePath({ scenario, progress, collapsed, onToggle }: {
           </section>
           <section className="experience-path__section" aria-labelledby="experience-console-title">
             <div className="experience-path__section-title"><h2 id="experience-console-title">02 / 开始构建</h2></div>
-            <a className="experience-path__console" href="https://console.shengwang.cn/" target="_blank" rel="noreferrer">
+            <a className="experience-path__console" href="https://console.shengwang.cn/" target="_blank" rel="noreferrer"
+              onClick={onConsoleClick}>
               前往 Console 创建项目<span className="experience-path__arrow" aria-hidden="true">↗</span>
             </a>
           </section>
           <section className="experience-path__section" aria-labelledby="experience-docs-title">
             <div className="experience-path__section-title"><h2 id="experience-docs-title">03 / 开发文档</h2></div>
             <div className="experience-path__resources">
-              {sceneResources.map(({ label, href }) => <a key={label} href={href} target="_blank" rel="noreferrer" aria-label={label}>
+              {sceneResources.map(({ label, href, type }) => <a key={label} href={href} target="_blank" rel="noreferrer" aria-label={label}
+                onClick={() => onDocClick?.(type)}>
                 {label}<span className="experience-path__arrow" aria-hidden="true">↗</span>
               </a>)}
             </div>

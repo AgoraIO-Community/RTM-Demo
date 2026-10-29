@@ -1,3 +1,5 @@
+import { appPath } from '../paths';
+
 export interface TokenAuthConfig {
   mode: 'token';
 }
@@ -11,7 +13,7 @@ export type TokenProvider = (request: TokenRequest) => Promise<string | undefine
 
 export async function getAgoraToken(request: TokenRequest, auth?: TokenAuthConfig): Promise<string | undefined> {
   if (!auth) return undefined;
-  const response = await fetch('/api/token', {
+  const response = await fetch(appPath('/api/token'), {
     method: 'POST', credentials: 'same-origin', mode: 'same-origin', cache: 'no-store',
     headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(request),
   });
