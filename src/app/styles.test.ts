@@ -34,9 +34,9 @@ function block(selector: string): string {
 }
 
 describe('设计 token', () => {
-  it('正文沿用系统字形渲染并使用 500 基准字重', () => {
+  it('正文沿用系统字形渲染并使用 400 基准字重（v2.0 对齐 Agent UI）', () => {
     const body = ruleBody('body');
-    expect(body).toContain('font-weight: 500');
+    expect(body).toContain('font-weight: 400');
     expect(body).not.toContain('-webkit-font-smoothing: antialiased');
   });
 
@@ -44,12 +44,19 @@ describe('设计 token', () => {
     const light = ruleBody(':root');
     const dark = ruleBody('[data-theme="dark"]');
     for (const [name, lightValue, darkValue] of [
-      ['--ink-canvas', '#fafafa', '#0f1012'],
-      ['--ink-surface', '#ffffff', '#141517'],
-      ['--ink-line', '#e6e7ea', '#2a2b2f'],
-      ['--ink-fg', '#111214', '#f2f2f3'],
-      ['--ink-ink', '#111214', '#f2f2f3'],
-      ['--ink-on-ink', '#ffffff', '#111214'],
+      ['--ink-canvas', '#fcf9f8', '#000000'],
+      ['--ink-surface', '#ffffff', '#0a0a0a'],
+      ['--ink-subtle', '#f1f0f0', '#1a1a1a'],
+      ['--ink-hover', '#e7e5e5', '#242424'],
+      ['--ink-line', '#d6d6d6', '#383838'],
+      ['--ink-dash-strong', '#8a8a8a', '#626262'],
+      ['--ink-fg2', '#626262', '#b3b3b3'],
+      ['--ink-fg', '#0f0f0f', '#fcf9f8'],
+      ['--ink-ink', '#0f0f0f', '#fcf9f8'],
+      ['--ink-on-ink', '#fcf9f8', '#000000'],
+      ['--ink-signal', '#075c9a', '#00c2ff'],
+      ['--ink-focus', '#075c9a', '#a0faff'],
+      ['--ink-link', '#075c9a', '#00c2ff'],
       ['--ink-success', '#1f8a5b', '#3fb27f'],
       ['--ink-danger', '#c8362f', '#e5534b'],
     ]) {
@@ -75,13 +82,45 @@ describe('设计 token', () => {
     const root = ruleBody(':root');
     for (const [name, value] of [
       ['--ink-fs', '13px'], ['--ink-fs-sm', '12px'], ['--ink-h1', '22px'], ['--ink-h2', '16px'],
-      ['--ink-pad', '24px'], ['--ink-gap', '12px'], ['--ink-row-p', '11px'], ['--ink-btn-h', '38px'],
-      ['--ink-hdr-h', '76px'], ['--ink-avatar', '44px'], ['--ink-trace-p', '14px'],
+      ['--ink-pad', '24px'], ['--ink-gap', '12px'], ['--ink-row-p', '12px'], ['--ink-btn-h', '40px'],
+      ['--ink-hdr-h', '76px'], ['--ink-avatar', '44px'], ['--ink-trace-p', '12px'],
       ['--ink-side-w', '252px'], ['--ink-tl-w', '420px'], ['--ink-panel-w', '300px'], ['--ink-rail-w', '48px'],
     ]) {
       expect(root).toContain(`${name}: ${value}`);
     }
     expect(css).not.toContain('data-density');
+  });
+
+  it('纯黑深色底不用投影，层级由 surface 与边线表达', () => {
+    expect(ruleBody('[data-theme="dark"]')).toContain('--ink-stage-shadow: none');
+  });
+
+  it('字重只用 400 / 600，不再出现 500 / 700', () => {
+    expect(css).not.toMatch(/font-weight: (500|700)/);
+    expect(css).not.toMatch(/font: (500|700) /);
+  });
+
+  it('动效使用 Agent UI 的时长与缓动 token', () => {
+    const root = ruleBody(':root');
+    for (const [name, value] of [
+      ['--ink-duration-fast', '0.2s'], ['--ink-duration-standard', '0.36s'], ['--ink-duration-slow', '0.6s'],
+      ['--ink-duration-press', '0.14s'], ['--ink-ease-standard', 'cubic-bezier(.22, .61, .36, 1)'],
+      ['--ink-ease-enter', 'cubic-bezier(.16, 1, .3, 1)'], ['--ink-ease-exit', 'cubic-bezier(.4, 0, 1, 1)'],
+    ]) {
+      expect(root).toContain(`${name}: ${value}`);
+    }
+  });
+
+  it('焦点环 2px、偏移 3px，使用 focus 角色色', () => {
+    const focus = ruleBody(':focus-visible');
+    expect(focus).toContain('outline: 2px solid var(--ink-focus)');
+    expect(focus).toContain('outline-offset: 3px');
+  });
+
+  it('主按钮悬浮转 signal，按压只加内凹，控件尺寸不变', () => {
+    expect(ruleBody('.ink-button--primary:not(:disabled):hover')).toContain('background: var(--ink-signal)');
+    expect(ruleBody('.ink-button:not(:disabled):active')).toContain('box-shadow: var(--ink-press-shadow)');
+    expect(ruleBody('.ink-button')).not.toMatch(/transform/);
   });
 
   it('颜色字面量只出现在两个 token 块里，组件规则一律引用变量', () => {
@@ -90,11 +129,22 @@ describe('设计 token', () => {
     expect(rest).not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
   });
 
-  it('字体栈：人类语言用系统 UI 字体，机器可读信息用等宽字体，不再引用 Inter', () => {
+  it('字体栈：人类语言 MiSans 优先并回退系统 UI 字体，机器可读信息用等宽字体，不再引用 Inter', () => {
     const root = ruleBody(':root');
+    expect(root).toContain('--ink-font-ui: "MiSans", -apple-system');
     expect(root).toContain('"PingFang SC", "Microsoft YaHei"');
     expect(root).toContain('ui-monospace, "SF Mono", Menlo, Consolas, monospace');
     expect(css).not.toContain('Inter');
+  });
+
+  it('MiSans 只声明 400 / 600 两个字重，原样引用 woff2 并允许回退', () => {
+    const faces = [...css.matchAll(/@font-face \{([^}]*)\}/g)].map((match) => match[1]);
+    expect(faces).toHaveLength(2);
+    expect(faces[0]).toContain('url("./assets/fonts/MiSans-Regular.woff2") format("woff2")');
+    expect(faces[0]).toContain('font-weight: 400');
+    expect(faces[1]).toContain('url("./assets/fonts/MiSans-Demibold.woff2") format("woff2")');
+    expect(faces[1]).toContain('font-weight: 600');
+    for (const face of faces) expect(face).toContain('font-display: swap');
   });
 });
 
@@ -144,7 +194,7 @@ describe('数据流', () => {
   });
 
   it('新到行只用 1.8s 呼吸表达「刚发生」，两个周期后静止', () => {
-    expect(ruleBody('.lab-trace')).toContain('animation: lab-rowin 0.35s ease-out, lab-rowbreathe 1.8s ease-in-out 0.3s 2');
+    expect(ruleBody('.lab-trace')).toContain('animation: lab-rowin var(--ink-duration-standard) var(--ink-ease-enter), lab-rowbreathe 1.8s var(--ink-ease-standard) 0.3s 2');
     expect(css).toContain('@keyframes lab-rowbreathe');
     const breathe = css.slice(css.indexOf('@keyframes lab-rowbreathe'), css.indexOf('@keyframes lab-seatbreathe'));
     expect(breathe).toContain('border-left-color: var(--lab-trace-color)');
@@ -172,7 +222,7 @@ describe('语聊房', () => {
     expect(seats).toContain('grid-auto-rows: 132px');
     expect(ruleBody('.vr-single__seat[data-state="empty"]')).toContain('border-style: dashed');
     expect(css).not.toMatch(/\.vr-single__seat\[data-speaking="true"\]\s*\{/u);
-    expect(ruleBody('.vr-single__seat[data-speaking="true"] .vr-single__seat-avatar')).toContain('animation: lab-seatbreathe 1.8s ease-in-out infinite');
+    expect(ruleBody('.vr-single__seat[data-speaking="true"] .vr-single__seat-avatar')).toContain('animation: lab-seatbreathe 1.8s var(--ink-ease-standard) infinite');
     expect(ruleBody('.vr-single__seat[data-selected="true"]')).toContain('box-shadow: 0 0 0 3px var(--ink-ring)');
   });
 
@@ -189,7 +239,7 @@ describe('语聊房', () => {
     expect(css.match(/box-shadow: var\(--ink-stage-shadow\)/g)).toHaveLength(3);
     const shadows = [...css.matchAll(/box-shadow:\s*([^;]+);/g)].map((match) => match[1].trim());
     for (const shadow of shadows) {
-      expect(shadow).toMatch(/^(0 0 0 0 transparent|0 0 0 3px var\(--ink-(ring|surface)\)|0 0 12px 1px var\(--ink-glow\)|0 0 10px 0 color-mix\(in oklab, var\(--lab-trace-color\) 35%, transparent\)|var\(--ink-stage-shadow\)|inset 0 0 0 1px var\(--ink-danger\))$/);
+      expect(shadow).toMatch(/^(0 0 0 0 transparent|0 0 0 3px var\(--ink-(ring|surface)\)|0 0 12px 1px var\(--ink-glow\)|0 0 10px 0 color-mix\(in oklab, var\(--lab-trace-color\) 35%, transparent\)|var\(--ink-stage-shadow\)|var\(--ink-press-shadow\)|inset 0 0 0 1px var\(--ink-danger\))$/);
     }
   });
 });

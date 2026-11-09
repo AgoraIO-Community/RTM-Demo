@@ -42,6 +42,9 @@ playwright/.auth/
 .env.*
 !.env.example
 
+# MiSans 协议禁止单独分发字体文件：woff2 只在本地与部署时放入，不入库。
+src/app/assets/fonts/
+
 # 当前通过 npm 安装 SDK；本机历史副本不随开源仓库分发。
 vendor/
 

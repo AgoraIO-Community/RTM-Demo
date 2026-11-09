@@ -74,7 +74,7 @@ function rowTexts(): string[] {
 describe('两类条目与图例', () => {
   it('新条目以记录色柔和呼吸两个周期，之后静止', () => {
     expect(stylesSource).toMatch(
-      /\.lab-trace \{[^}]*animation: lab-rowin 0\.35s ease-out, lab-rowbreathe 1\.8s ease-in-out 0\.3s 2/,
+      /\.lab-trace \{[^}]*animation: lab-rowin var\(--ink-duration-standard\) var\(--ink-ease-enter\), lab-rowbreathe 1\.8s var\(--ink-ease-standard\) 0\.3s 2/,
     );
     expect(stylesSource).toContain('@keyframes lab-rowbreathe');
   });

@@ -1571,7 +1571,7 @@ test.describe('v1.2 数据流视觉增量', () => {
       await expect(main).toHaveCSS('background-position', '-1px -1px, -1px -1px');
       const grid = await main.evaluate(el => getComputedStyle(el).backgroundImage);
       expect(grid.match(/linear-gradient/g)).toHaveLength(2);
-      expect(grid).toContain(theme === 'light' ? 'rgb(236, 236, 238)' : 'rgb(26, 27, 30)');
+      expect(grid).toContain(theme === 'light' ? 'rgb(239, 237, 236)' : 'rgb(20, 20, 20)');
 
       const path = page.getByRole('complementary', { name: '体验路径' });
       const pathToggle = path.getByRole('button', { name: '体验路径', exact: true });
@@ -1594,8 +1594,8 @@ test.describe('v1.2 数据流视觉增量', () => {
       await expect(room).toBeVisible();
       await expect(page.getByTestId('voice-room-loading-overlay')).toHaveCount(0);
       await expect(room).toHaveCSS('box-shadow', theme === 'light'
-        ? 'rgba(17, 18, 20, 0.04) 0px 1px 2px 0px, rgba(17, 18, 20, 0.12) 0px 12px 32px -8px'
-        : 'rgba(0, 0, 0, 0.4) 0px 1px 2px 0px, rgba(0, 0, 0, 0.6) 0px 12px 32px -8px');
+        ? 'rgba(15, 15, 15, 0.04) 0px 1px 2px 0px, rgba(15, 15, 15, 0.12) 0px 12px 32px -8px'
+        : 'none');
 
       await ensureTimelineExpanded(page);
       const timeline = page.getByRole('complementary', { name: '时间线' });
@@ -1632,7 +1632,7 @@ test.describe('v1.2 数据流视觉增量', () => {
         expect(row.height).toBeGreaterThanOrEqual(70);
         expect(row.scrollWidth).toBeLessThanOrEqual(row.clientWidth);
       }
-      await expect(rows.first()).toHaveCSS('background-color', theme === 'light' ? 'rgb(255, 255, 255)' : 'rgb(20, 21, 23)');
+      await expect(rows.first()).toHaveCSS('background-color', theme === 'light' ? 'rgb(255, 255, 255)' : 'rgb(10, 10, 10)');
       await expect(rows.first()).toHaveCSS('border-top-width', '1px');
       await expect(rows.first()).toHaveCSS('border-left-width', '3px');
       const longApi = rows.filter({ has: page.locator('.lab-trace__name', { hasText: LONG_API_NAME }) });
@@ -1676,13 +1676,13 @@ test.describe('v1.2 数据流视觉增量', () => {
     await page.goto('/social/voice-room');
     await ensureTimelineExpanded(page);
     const row = page.getByTestId('trace-row').filter({ has: page.locator('.lab-trace__name', { hasText: LONG_API_NAME }) });
-    await expect(row).toHaveCSS('animation-duration', '0.35s, 1.8s');
+    await expect(row).toHaveCSS('animation-duration', '0.36s, 1.8s');
     await expect(row).toHaveCSS('animation-iteration-count', '1, 2');
     await expect(row).toHaveCSS('animation-delay', '0s, 0.3s');
     await expect.poll(() => row.evaluate(element => getComputedStyle(element).boxShadow)).not.toBe('none');
     await expect(row).toHaveCSS('background-color', 'rgb(255, 255, 255)');
     await expect(row).toHaveCSS('box-shadow', 'none', { timeout: 6_000 });
-    await expect(row).toHaveCSS('border-top-color', 'rgb(230, 231, 234)');
+    await expect(row).toHaveCSS('border-top-color', 'rgb(214, 214, 214)');
     await expect(row).toHaveCSS('border-left-color', 'rgb(47, 169, 138)');
     await expect(row).toHaveCSS('background-color', 'rgb(255, 255, 255)');
 
