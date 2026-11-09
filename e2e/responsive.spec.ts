@@ -27,7 +27,7 @@ for (const theme of ['light', 'dark'] as const) {
           font: parseFloat(getComputedStyle(document.body).fontSize),
           logo: size('.lab-brand__logo img').width,
           topbar: size('.lab-topbar').height,
-          icon: size('.oc-avatar svg').width,
+          icon: size('.oc-icon-button svg').width,
           left: size('.experience-path').width,
           right: size('.lab-timeline').width,
           documentWidth: document.documentElement.scrollWidth,
@@ -41,7 +41,7 @@ for (const theme of ['light', 'dark'] as const) {
       const scale = dimensions.font / 13;
       expect(dimensions.logo).toBeCloseTo(48 * scale, 0);
       expect(dimensions.topbar).toBeCloseTo(56 * scale, 0);
-      expect(dimensions.icon).toBeCloseTo(24 * scale, 0);
+      expect(dimensions.icon).toBeCloseTo(16 * scale, 0);
       if (viewport.width >= 1280) {
         expect(dimensions.left).toBeCloseTo(252 * scale, 0);
         expect(dimensions.right).toBeCloseTo(420 * scale, 0);
