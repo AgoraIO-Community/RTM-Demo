@@ -17,6 +17,7 @@ export interface ExperienceScenario {
   path: string;
   description: string;
   status: 'ready' | 'planned';
+  bestPracticeUrl?: string;
   steps: readonly ExperienceStep[];
 }
 

@@ -38,8 +38,10 @@ export const oneToOneCallSteps: readonly ExperienceStep[] = [
 /** The seven public entries retain existing URLs, including shared room invitations. */
 export const experienceScenarios: readonly ExperienceScenario[] = [
   { id: 'voice-room', label: '语聊房', path: '/social/voice-room', status: 'ready',
+    bestPracticeUrl: 'https://doc.shengwang.cn/doc/rtm2/javascript/best-practice/voice-room',
     description: '体验麦位管理、公屏互动与房间状态同步。', steps: voiceRoomSteps },
   { id: 'one-to-one-call', label: '1V1呼叫邀请', path: '/social/one-to-one-call', status: 'ready',
+    bestPracticeUrl: 'https://doc.shengwang.cn/doc/rtm2/javascript/best-practice/one-to-one-call',
     description: '通过呼叫邀请、接听、拒绝与挂断，体验双方通话状态的协同。', steps: oneToOneCallSteps },
   { id: 'ecommerce-live', label: '电商直播', path: '/content/live-chat-gifts', status: 'planned',
     description: '通过商品讲解、观众互动与直播间通知，体验消息与共享状态的同步。', steps: [] },

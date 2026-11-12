@@ -161,7 +161,7 @@ export function ExperiencePath({ scenario, progress, collapsed, onToggle, onCons
           <section className="experience-path__section" aria-labelledby="experience-docs-title">
             <div className="experience-path__section-title"><h2 id="experience-docs-title">03 / 开发文档</h2></div>
             <div className="experience-path__resources">
-              {sceneResources.map(({ label, href, type }) => <a key={label} href={href} target="_blank" rel="noreferrer" aria-label={label}
+              {sceneResources.map(({ label, href, type }) => <a key={label} href={type === 'practice' ? scenario?.bestPracticeUrl ?? href : href} target="_blank" rel="noreferrer" aria-label={label}
                 onClick={() => onDocClick?.(type)}>
                 {label}<span className="experience-path__arrow" aria-hidden="true">↗</span>
               </a>)}
